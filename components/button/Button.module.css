@@ -1,0 +1,16 @@
+.button {
+  border: 2px solid black;
+  background: white;
+  padding: 0.5rem 0.75rem;
+  cursor: pointer;
+}
+
+.button[aria-pressed="true"] {
+  background: black;
+  color: white;
+}
+
+.button:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}

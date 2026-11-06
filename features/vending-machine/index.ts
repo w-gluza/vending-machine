@@ -1,3 +1,4 @@
+export { VendingMachineScreen } from "./components/vending-machine-screen/VendingMachineScreen";
 export type {
   CoinInventory,
   CoinStack,

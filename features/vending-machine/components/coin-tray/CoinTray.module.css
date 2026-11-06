@@ -1,0 +1,12 @@
+.tray {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  align-items: flex-start;
+}
+
+.coins {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}

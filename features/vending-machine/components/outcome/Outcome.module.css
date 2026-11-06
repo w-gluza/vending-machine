@@ -1,0 +1,15 @@
+.outcome {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.coins {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.refused {
+  font-weight: bold;
+}

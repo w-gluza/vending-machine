@@ -1,4 +1,6 @@
 import type { Metadata } from "next";
+import "@/styles/reset.css";
+import "@/styles/globals.css";
 
 const title = "Vending machine";
 const description =
