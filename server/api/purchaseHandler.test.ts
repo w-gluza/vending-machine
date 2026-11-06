@@ -175,6 +175,35 @@ describe("POST /api/purchase", () => {
   });
 });
 
+describe("POST /api/purchase under contention", () => {
+  it("answers 503 with Retry-After when the state keeps changing underneath", async () => {
+    const inner = createInMemoryStore();
+    const alwaysStale = { load: () => inner.load(), save: async () => false };
+    const response = await createPurchaseHandler({
+      store: alwaysStale,
+      limiter: createInMemoryRateLimiter(),
+    })(post(valid));
+    expect(response.status).toBe(503);
+    expect(response.headers.get("Retry-After")).toBe("1");
+    expect(await response.json()).toMatchObject({ error: "conflict" });
+  });
+
+  it("serves simultaneous purchases from different customers without losing any", async () => {
+    const shared = instances();
+    const handler = createPurchaseHandler(shared);
+    const responses = await Promise.all(
+      ["a", "b", "c", "d", "e", "f"].map((customerId) =>
+        handler(post({ ...valid, customerId })),
+      ),
+    );
+    expect(responses.map((r) => r.status)).toEqual([
+      200, 200, 200, 200, 200, 200,
+    ]);
+    const machine = await createMachineHandler(shared)();
+    expect(await machine.json()).toMatchObject({ cashBoxInPence: 600 });
+  });
+});
+
 describe("GET /api/machine", () => {
   it("returns the snapshot with full float and empty cash box at start", async () => {
     const response = await createMachineHandler(instances())();

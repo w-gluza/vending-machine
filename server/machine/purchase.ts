@@ -8,7 +8,29 @@ import type { MachineStore } from "./store";
 
 const MAX_SAVE_ATTEMPTS = 3;
 
-export const purchase = async (
+export class PurchaseConflictError extends Error {
+  constructor() {
+    super("Purchase could not be committed after concurrent updates");
+    this.name = "PurchaseConflictError";
+  }
+}
+
+const queues = new WeakMap<MachineStore, Promise<unknown>>();
+
+const serialise = <T>(
+  store: MachineStore,
+  task: () => Promise<T>,
+): Promise<T> => {
+  const previous = queues.get(store) ?? Promise.resolve();
+  const run = previous.then(task, task);
+  queues.set(
+    store,
+    run.catch(() => undefined),
+  );
+  return run;
+};
+
+const commitPurchase = async (
   input: PurchaseInput,
   store: MachineStore,
 ): Promise<PurchaseResult> => {
@@ -41,5 +63,11 @@ export const purchase = async (
     }
   }
 
-  throw new Error("Purchase could not be committed after concurrent updates");
+  throw new PurchaseConflictError();
 };
+
+export const purchase = (
+  input: PurchaseInput,
+  store: MachineStore,
+): Promise<PurchaseResult> =>
+  serialise(store, () => commitPurchase(input, store));

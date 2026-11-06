@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import { createInitialInventory } from "@/features/vending-machine/domain/coinInventory";
 import { getSnapshot } from "./getSnapshot";
 import { createInMemoryStore } from "./inMemoryStore";
-import { purchase } from "./purchase";
+import { purchase, PurchaseConflictError } from "./purchase";
 import type { MachineStore } from "./store";
 
 const input = (
@@ -128,12 +128,26 @@ describe("purchase", () => {
     );
   });
 
+  it("commits every one of several simultaneous purchases exactly once", async () => {
+    const store = createInMemoryStore();
+    const results = await Promise.all(
+      Array.from({ length: 6 }, () => purchase(input(), store)),
+    );
+    expect(results.every((r) => r.ok)).toBe(true);
+    const snapshot = await getSnapshot(store);
+    expect(snapshot.cashBoxInPence).toBe(600);
+    expect(snapshot.coins[10]).toBe(4);
+    expect(snapshot.coins[5]).toBe(4);
+  });
+
   it("gives up after repeated conflicts", async () => {
     const inner = createInMemoryStore();
     const alwaysStale: MachineStore = {
       load: () => inner.load(),
       save: async () => false,
     };
-    await expect(purchase(input(), alwaysStale)).rejects.toThrow();
+    await expect(purchase(input(), alwaysStale)).rejects.toThrow(
+      PurchaseConflictError,
+    );
   });
 });

@@ -1,7 +1,7 @@
 import type { PurchaseResult } from "@/features/vending-machine/domain/types";
 import type { Instances } from "@/server/instance";
 import { getSnapshot } from "@/server/machine/getSnapshot";
-import { purchase } from "@/server/machine/purchase";
+import { purchase, PurchaseConflictError } from "@/server/machine/purchase";
 import {
   isJsonObject,
   validateCustomerId,
@@ -64,12 +64,20 @@ export const createPurchaseHandler =
     const order = validateOrder(body);
     if (!order.ok) return validationResponse(order.issues);
 
-    const result = await purchase(
-      {
-        priceInPence: order.value.product.priceInPence,
-        paidInPence: order.value.paidInPence,
-      },
-      store,
-    );
-    return Response.json(result, { status: statusFor(result) });
+    try {
+      const result = await purchase(
+        {
+          priceInPence: order.value.product.priceInPence,
+          paidInPence: order.value.paidInPence,
+        },
+        store,
+      );
+      return Response.json(result, { status: statusFor(result) });
+    } catch (error) {
+      if (!(error instanceof PurchaseConflictError)) throw error;
+      return Response.json(
+        { error: "conflict", message: "The machine is busy. Try again." },
+        { status: 503, headers: { "Retry-After": "1" } },
+      );
+    }
   };
