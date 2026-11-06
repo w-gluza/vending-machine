@@ -140,6 +140,26 @@ describe("purchase", () => {
     expect(snapshot.coins[5]).toBe(4);
   });
 
+  it("keeps serving purchases after one of them throws", async () => {
+    const inner = createInMemoryStore();
+    let loads = 0;
+    const flaky: MachineStore = {
+      load: () => {
+        loads += 1;
+        if (loads === 1) throw new Error("database hiccup");
+        return inner.load();
+      },
+      save: (next, expectedVersion) => inner.save(next, expectedVersion),
+    };
+    const [first, second] = await Promise.allSettled([
+      purchase(input(), flaky),
+      purchase(input(), flaky),
+    ]);
+    expect(first.status).toBe("rejected");
+    expect(second).toMatchObject({ status: "fulfilled", value: { ok: true } });
+    expect((await getSnapshot(inner)).cashBoxInPence).toBe(100);
+  });
+
   it("gives up after repeated conflicts", async () => {
     const inner = createInMemoryStore();
     const alwaysStale: MachineStore = {

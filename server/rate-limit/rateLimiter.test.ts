@@ -51,12 +51,14 @@ describe("in-memory rate limiter", () => {
     expect((await limiter.attempt("b", 10)).allowed).toBe(true);
   });
 
-  it("forgets customers whose attempts have all left the window", async () => {
+  it("sweeps expired customers once more than the threshold are tracked, without capping the map", async () => {
     const limiter = createInMemoryRateLimiter(3, 3000, 10);
     for (let i = 0; i < 11; i++) await limiter.attempt(`one-off-${i}`, 0);
     expect(limiter.trackedKeys()).toBe(11);
     await limiter.attempt("later", 5000);
     expect(limiter.trackedKeys()).toBe(1);
+    for (let i = 0; i < 20; i++) await limiter.attempt(`fresh-${i}`, 5000);
+    expect(limiter.trackedKeys()).toBe(21);
   });
 
   it("does not count rate-limited attempts towards the limit", async () => {
