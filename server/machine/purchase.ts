@@ -1,39 +1,19 @@
 import { decidePurchase } from "@/features/vending-machine/domain/decidePurchase";
 import type {
-  PurchaseRequest,
+  PurchaseInput,
   PurchaseResult,
 } from "@/features/vending-machine/domain/types";
-import type { RateLimiter } from "@/server/rate-limit/rateLimiter";
 import { toSnapshot } from "./getSnapshot";
 import type { MachineStore } from "./store";
 
 const MAX_SAVE_ATTEMPTS = 3;
 
-export type PurchaseDependencies = {
-  store: MachineStore;
-  limiter: RateLimiter;
-  now?: () => number;
-};
-
 export const purchase = async (
-  request: PurchaseRequest,
-  { store, limiter, now = Date.now }: PurchaseDependencies,
+  input: PurchaseInput,
+  store: MachineStore,
 ): Promise<PurchaseResult> => {
-  const { customerId, priceInPence, paidInPence } = request;
+  const { priceInPence, paidInPence } = input;
   const context = { priceInPence, paidInPence };
-
-  const gate = await limiter.attempt(customerId, now());
-  if (!gate.allowed) {
-    const { state } = await store.load();
-    return {
-      ok: false,
-      reason: "rate_limited",
-      message: `Too many purchases. Try again in ${(gate.retryAfterMs / 1000).toFixed(1)}s.`,
-      retryAfterMs: gate.retryAfterMs,
-      ...context,
-      machine: toSnapshot(state),
-    };
-  }
 
   for (let attempt = 0; attempt < MAX_SAVE_ATTEMPTS; attempt++) {
     const { state, version } = await store.load();
