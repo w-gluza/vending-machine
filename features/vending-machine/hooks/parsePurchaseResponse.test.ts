@@ -74,6 +74,43 @@ describe("parsePurchaseResponse", () => {
     ["a refusal without a reason", 422, { ...refused, reason: undefined }],
     ["a non-JSON body", 200, null],
     ["an empty 400", 400, {}],
+    [
+      "a success without changeDueInPence",
+      200,
+      { ...dispensed, changeDueInPence: undefined },
+    ],
+    [
+      "a success with an unknown coin",
+      200,
+      { ...dispensed, change: [{ denomination: 3, count: 1 }] },
+    ],
+    [
+      "a success with a zero-count stack",
+      200,
+      { ...dispensed, change: [{ denomination: 10, count: 0 }] },
+    ],
+    [
+      "an empty inventory",
+      200,
+      { ...dispensed, machine: { ...machine, coins: {} } },
+    ],
+    [
+      "a negative cash box",
+      200,
+      { ...dispensed, machine: { ...machine, cashBoxInPence: -1 } },
+    ],
+    ["a fractional price", 200, { ...dispensed, priceInPence: 85.5 }],
+    [
+      "a short payment without the shortfall",
+      422,
+      { ...refused, shortfallInPence: undefined },
+    ],
+    ["an unknown refusal reason", 422, { ...refused, reason: "out_of_stock" }],
+    [
+      "a rate limit without retryAfterMs",
+      429,
+      { ...refused, reason: "rate_limited", shortfallInPence: undefined },
+    ],
   ])("fails safely on %s", (_, status, body) => {
     expect(parsePurchaseResponse(status, body)).toEqual({
       kind: "failure",

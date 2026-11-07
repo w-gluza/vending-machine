@@ -28,12 +28,13 @@ export const createInMemoryRateLimiter = (
   }
 
   const attempts = new Map<string, number[]>();
+  let lastSweepAt = -Infinity;
 
-  const prune = (cutoff: number) => {
+  const sweep = (now: number, cutoff: number) => {
+    if (attempts.size <= pruneAbove || now - lastSweepAt < windowMs) return;
+    lastSweepAt = now;
     for (const [key, times] of attempts) {
-      const recent = times.filter((t) => t > cutoff);
-      if (recent.length === 0) attempts.delete(key);
-      else attempts.set(key, recent);
+      if (times[times.length - 1] <= cutoff) attempts.delete(key);
     }
   };
 
@@ -44,7 +45,7 @@ export const createInMemoryRateLimiter = (
       const allowed = recent.length < limit;
 
       attempts.set(key, allowed ? [...recent, now] : recent);
-      if (attempts.size > pruneAbove) prune(cutoff);
+      sweep(now, cutoff);
 
       return allowed
         ? { allowed, remaining: limit - recent.length - 1 }

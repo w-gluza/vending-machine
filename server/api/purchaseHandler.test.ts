@@ -117,6 +117,16 @@ describe("POST /api/purchase", () => {
     expect((await handler(post(valid))).status).toBe(200);
   });
 
+  it("still answers 429 when a throttled request carries a malformed payment", async () => {
+    const handler = createPurchaseHandler(instances());
+    for (let i = 0; i < 3; i++) await handler(post(valid));
+    const response = await handler(
+      post({ ...valid, paidInPence: { toString: null, valueOf: null } }),
+    );
+    expect(response.status).toBe(429);
+    expect(await response.json()).toMatchObject({ paidInPence: 0 });
+  });
+
   it("does not rate limit a request without a valid customer id", async () => {
     const handler = createPurchaseHandler(instances());
     for (let i = 0; i < 5; i++) {

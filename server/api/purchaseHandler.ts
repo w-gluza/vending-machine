@@ -52,7 +52,9 @@ export const createPurchaseHandler =
         message: `Too many purchases. Try again in ${(gate.retryAfterMs / 1000).toFixed(1)}s.`,
         retryAfterMs: gate.retryAfterMs,
         priceInPence: 0,
-        paidInPence: Number(body.paidInPence) || 0,
+        paidInPence: Number.isSafeInteger(body.paidInPence)
+          ? (body.paidInPence as number)
+          : 0,
         machine: await getSnapshot(store),
       };
       return Response.json(result, {

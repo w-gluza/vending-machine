@@ -61,6 +61,19 @@ describe("in-memory rate limiter", () => {
     expect(limiter.trackedKeys()).toBe(21);
   });
 
+  it("sweeps at most once per window, so active traffic above the threshold is not rescanned on every request", async () => {
+    const limiter = createInMemoryRateLimiter(3, 3000, 10);
+    for (let i = 0; i < 20; i++) await limiter.attempt(`burst-${i}`, 0);
+    for (let i = 0; i < 20; i++) await limiter.attempt(`more-${i}`, 2999);
+    expect(limiter.trackedKeys()).toBe(40);
+    await limiter.attempt("tick", 3000);
+    expect(limiter.trackedKeys()).toBe(21);
+    await limiter.attempt("tock", 5999);
+    expect(limiter.trackedKeys()).toBe(22);
+    await limiter.attempt("tack", 6000);
+    expect(limiter.trackedKeys()).toBe(2);
+  });
+
   it("does not count rate-limited attempts towards the limit", async () => {
     const limiter = createInMemoryRateLimiter();
     for (let i = 0; i < 3; i++) await limiter.attempt("a", i);
