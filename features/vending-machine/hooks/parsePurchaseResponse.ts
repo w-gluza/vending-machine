@@ -1,5 +1,6 @@
-import { isDenomination } from "../domain/coinInventory";
-import { DENOMINATIONS, type PurchaseResult } from "../domain/types";
+import { z } from "zod";
+import { purchaseResultSchema } from "../domain/schemas";
+import type { PurchaseResult } from "../domain/types";
 
 export type ParsedPurchaseResponse =
   | { kind: "result"; result: PurchaseResult }
@@ -11,62 +12,14 @@ export const UNEXPECTED_RESPONSE_MESSAGE =
   "The machine gave an unexpected answer. Your coins are still inserted.";
 export const BUSY_MESSAGE = "The machine is busy. Press Buy again in a moment.";
 
-const isRecord = (value: unknown): value is Record<string, unknown> =>
-  typeof value === "object" && value !== null && !Array.isArray(value);
-
-const isPence = (value: unknown): value is number =>
-  typeof value === "number" && Number.isSafeInteger(value) && value >= 0;
-
-const isCoinStack = (value: unknown) =>
-  isRecord(value) &&
-  typeof value.denomination === "number" &&
-  isDenomination(value.denomination) &&
-  isPence(value.count) &&
-  value.count > 0;
-
-const isInventory = (value: unknown) =>
-  isRecord(value) &&
-  DENOMINATIONS.every((denomination) => isPence(value[denomination]));
-
-const isSnapshot = (value: unknown) =>
-  isRecord(value) &&
-  isInventory(value.coins) &&
-  isPence(value.cashBoxInPence) &&
-  isPence(value.changeAvailableInPence);
-
-const isRefusal = (value: Record<string, unknown>) => {
-  if (typeof value.message !== "string") return false;
-  switch (value.reason) {
-    case "insufficient_payment":
-      return isPence(value.shortfallInPence);
-    case "rate_limited":
-      return isPence(value.retryAfterMs);
-    case "cannot_make_change":
-      return true;
-    default:
-      return false;
-  }
-};
-
-const isDispense = (value: Record<string, unknown>) =>
-  isPence(value.changeDueInPence) &&
-  Array.isArray(value.change) &&
-  value.change.every(isCoinStack);
-
-const isPurchaseResult = (value: unknown): value is PurchaseResult =>
-  isRecord(value) &&
-  typeof value.ok === "boolean" &&
-  isPence(value.priceInPence) &&
-  isPence(value.paidInPence) &&
-  isSnapshot(value.machine) &&
-  (value.ok ? isDispense(value) : isRefusal(value));
+const validationBody = z.object({
+  issues: z.array(z.object({ message: z.string() })),
+});
 
 const validationMessage = (body: unknown): string | null => {
-  if (!isRecord(body) || !Array.isArray(body.issues)) return null;
-  const messages = body.issues.flatMap((issue) =>
-    isRecord(issue) && typeof issue.message === "string" ? [issue.message] : [],
-  );
-  return messages.length > 0 ? messages.join(", ") : null;
+  const parsed = validationBody.safeParse(body);
+  if (!parsed.success || parsed.data.issues.length === 0) return null;
+  return parsed.data.issues.map((issue) => issue.message).join(", ");
 };
 
 export const parsePurchaseResponse = (
@@ -80,8 +33,9 @@ export const parsePurchaseResponse = (
     };
   }
   if (status === 503) return { kind: "failure", message: BUSY_MESSAGE };
-  if (RESULT_STATUSES.has(status) && isPurchaseResult(body)) {
-    return { kind: "result", result: body };
+  if (RESULT_STATUSES.has(status)) {
+    const parsed = purchaseResultSchema.safeParse(body);
+    if (parsed.success) return { kind: "result", result: parsed.data };
   }
   return { kind: "failure", message: UNEXPECTED_RESPONSE_MESSAGE };
 };

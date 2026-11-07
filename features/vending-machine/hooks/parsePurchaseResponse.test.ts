@@ -46,6 +46,37 @@ describe("parsePurchaseResponse", () => {
     });
   });
 
+  it("accepts a cannot-make-change refusal", () => {
+    const body = {
+      ok: false,
+      reason: "cannot_make_change",
+      message: "Cannot make change.",
+      priceInPence: 85,
+      paidInPence: 100,
+      machine,
+    };
+    expect(parsePurchaseResponse(409, body)).toEqual({
+      kind: "result",
+      result: body,
+    });
+  });
+
+  it("accepts a rate-limited refusal", () => {
+    const body = {
+      ok: false,
+      reason: "rate_limited",
+      message: "Too many purchases.",
+      retryAfterMs: 1500,
+      priceInPence: 0,
+      paidInPence: 100,
+      machine,
+    };
+    expect(parsePurchaseResponse(429, body)).toEqual({
+      kind: "result",
+      result: body,
+    });
+  });
+
   it("joins validation issues into one message", () => {
     const body = {
       error: "validation",

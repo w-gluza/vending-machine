@@ -1,19 +1,22 @@
+import type { z } from "zod";
+import type {
+  coinInventorySchema,
+  coinStackSchema,
+  machineSnapshotSchema,
+  purchaseRefusalSchema,
+  purchaseResultSchema,
+  rateLimitRefusalSchema,
+} from "./schemas";
+
 export const DENOMINATIONS = [200, 100, 50, 20, 10, 5, 2, 1] as const;
 
 export type Denomination = (typeof DENOMINATIONS)[number];
 
-export type CoinInventory = Record<Denomination, number>;
+export type CoinInventory = z.infer<typeof coinInventorySchema>;
 
-export type CoinStack = {
-  denomination: Denomination;
-  count: number;
-};
+export type CoinStack = z.infer<typeof coinStackSchema>;
 
-export type MachineSnapshot = {
-  coins: CoinInventory;
-  changeAvailableInPence: number;
-  cashBoxInPence: number;
-};
+export type MachineSnapshot = z.infer<typeof machineSnapshotSchema>;
 
 export type PurchaseInput = {
   priceInPence: number;
@@ -24,30 +27,13 @@ export type PurchaseRequest = PurchaseInput & {
   customerId: string;
 };
 
-export type PurchaseRefusalReason =
-  "insufficient_payment" | "cannot_make_change";
+export type PurchaseRefusal = z.infer<typeof purchaseRefusalSchema>;
 
-export type RefusalReason = PurchaseRefusalReason | "rate_limited";
+export type RateLimitRefusal = z.infer<typeof rateLimitRefusalSchema>;
 
-export type PurchaseRefusal =
-  | {
-      ok: false;
-      reason: "insufficient_payment";
-      message: string;
-      shortfallInPence: number;
-    }
-  | {
-      ok: false;
-      reason: "cannot_make_change";
-      message: string;
-    };
+export type PurchaseRefusalReason = PurchaseRefusal["reason"];
 
-export type RateLimitRefusal = {
-  ok: false;
-  reason: "rate_limited";
-  message: string;
-  retryAfterMs: number;
-};
+export type RefusalReason = PurchaseRefusalReason | RateLimitRefusal["reason"];
 
 export type PurchaseDecision =
   | {
@@ -58,16 +44,4 @@ export type PurchaseDecision =
     }
   | PurchaseRefusal;
 
-type ResultContext = {
-  priceInPence: number;
-  paidInPence: number;
-  machine: MachineSnapshot;
-};
-
-export type PurchaseResult =
-  | ({
-      ok: true;
-      changeDueInPence: number;
-      change: CoinStack[];
-    } & ResultContext)
-  | ((PurchaseRefusal | RateLimitRefusal) & ResultContext);
+export type PurchaseResult = z.infer<typeof purchaseResultSchema>;

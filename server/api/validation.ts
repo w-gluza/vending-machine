@@ -1,3 +1,4 @@
+import { z } from "zod";
 import { products, type Product } from "@/data/products";
 
 export const MAX_CUSTOMER_ID_LENGTH = 64;
@@ -18,50 +19,52 @@ export const isJsonObject = (
 ): value is Record<string, unknown> =>
   typeof value === "object" && value !== null && !Array.isArray(value);
 
-const normaliseCustomerId = (value: string): string =>
-  value.trim().toLowerCase();
+const customerIdSchema = z
+  .string("must be a non-empty string")
+  .transform((value) => value.trim().toLowerCase())
+  .pipe(
+    z
+      .string()
+      .min(1, "must be a non-empty string")
+      .max(
+        MAX_CUSTOMER_ID_LENGTH,
+        `must be at most ${MAX_CUSTOMER_ID_LENGTH} characters`,
+      ),
+  );
+
+const isKnownProductId = (id: string) => products.some((p) => p.id === id);
+
+const orderSchema = z.object({
+  productId: z
+    .string("must be a known product id")
+    .refine(isKnownProductId, "must be a known product id"),
+  paidInPence: z
+    .int("must be a non-negative integer number of pence")
+    .nonnegative("must be a non-negative integer number of pence")
+    .max(MAX_PENCE, `must be at most ${MAX_PENCE}`),
+});
+
+const toIssues = (error: z.ZodError): ValidationIssue[] => {
+  const seen = new Set<string>();
+  return error.issues.flatMap((issue) => {
+    const field = String(issue.path[0] ?? "body");
+    if (seen.has(field)) return [];
+    seen.add(field);
+    return [{ field, message: issue.message }];
+  });
+};
 
 export const validateCustomerId = (value: unknown): Validated<string> => {
-  const normalised =
-    typeof value === "string" ? normaliseCustomerId(value) : "";
-  if (normalised.length === 0) {
-    return {
-      ok: false,
-      issues: [{ field: "customerId", message: "must be a non-empty string" }],
-    };
-  }
-  if (normalised.length > MAX_CUSTOMER_ID_LENGTH) {
-    return {
-      ok: false,
-      issues: [
-        {
+  const result = customerIdSchema.safeParse(value);
+  return result.success
+    ? { ok: true, value: result.data }
+    : {
+        ok: false,
+        issues: toIssues(result.error).map((issue) => ({
+          ...issue,
           field: "customerId",
-          message: `must be at most ${MAX_CUSTOMER_ID_LENGTH} characters`,
-        },
-      ],
-    };
-  }
-  return { ok: true, value: normalised };
-};
-
-const productIssue = (value: unknown): ValidationIssue | null => {
-  if (typeof value !== "string" || !products.some((p) => p.id === value)) {
-    return { field: "productId", message: "must be a known product id" };
-  }
-  return null;
-};
-
-const paidIssue = (value: unknown): ValidationIssue | null => {
-  if (typeof value !== "number" || !Number.isSafeInteger(value) || value < 0) {
-    return {
-      field: "paidInPence",
-      message: "must be a non-negative integer number of pence",
-    };
-  }
-  if (value > MAX_PENCE) {
-    return { field: "paidInPence", message: `must be at most ${MAX_PENCE}` };
-  }
-  return null;
+        })),
+      };
 };
 
 export type ValidatedOrder = { product: Product; paidInPence: number };
@@ -69,16 +72,10 @@ export type ValidatedOrder = { product: Product; paidInPence: number };
 export const validateOrder = (
   body: Record<string, unknown>,
 ): Validated<ValidatedOrder> => {
-  const issues = [
-    productIssue(body.productId),
-    paidIssue(body.paidInPence),
-  ].filter((issue): issue is ValidationIssue => issue !== null);
-
-  if (issues.length > 0) return { ok: false, issues };
-
-  const product = products.find((p) => p.id === body.productId) as Product;
-  return {
-    ok: true,
-    value: { product, paidInPence: body.paidInPence as number },
-  };
+  const result = orderSchema.safeParse(body);
+  if (!result.success) return { ok: false, issues: toIssues(result.error) };
+  const product = products.find(
+    (p) => p.id === result.data.productId,
+  ) as Product;
+  return { ok: true, value: { product, paidInPence: result.data.paidInPence } };
 };
