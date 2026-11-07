@@ -8,16 +8,16 @@ test("a customer buys ramune with a pound and gets 15p back", async ({
   await page.getByRole("button", { name: "Bob" }).click();
   await page.getByRole("button", { name: /Ramune/ }).click();
   await page.getByRole("button", { name: "Insert £1" }).click();
-  await expect(page.getByText("Inserted: £1.00")).toBeVisible();
-  await expect(page.getByText("Price: £0.85 Paying: £1.00")).toBeVisible();
+  await expect(page.getByText("Inserted £1.00")).toBeVisible();
+  await expect(page.getByText("Ramune £0.85")).toBeVisible();
 
   await page.getByRole("button", { name: "Buy" }).click();
 
   await expect(
     page.getByText("Dispensed. Paid £1.00 for £0.85."),
   ).toBeVisible();
-  await expect(page.getByText("Change £0.15:")).toBeVisible();
-  await expect(page.getByText("Inserted: £0.00")).toBeVisible();
+  await expect(page.getByText("Change £0.15.")).toBeVisible();
+  await expect(page.getByText("Inserted £0.00")).toBeVisible();
   await expect(page.getByRole("button", { name: /Ramune/ })).toHaveAttribute(
     "aria-pressed",
     "false",
@@ -26,9 +26,9 @@ test("a customer buys ramune with a pound and gets 15p back", async ({
 
   await page.reload();
   await expect(page.getByText(/Cash box: £1\.00\./)).toBeVisible();
-  await expect(page.getByText("Inserted: £0.00")).toBeVisible();
+  await expect(page.getByText("Inserted £0.00")).toBeVisible();
   await expect(
-    page.getByText("Pick a product, insert coins, press Buy."),
+    page.getByText("Choose a drink, insert your coins, and press Buy."),
   ).toBeVisible();
 });
 
@@ -59,7 +59,7 @@ test("an offline purchase fails at once and keeps the coins in", async ({
       "Could not reach the machine. Your coins are still inserted.",
     ),
   ).toBeVisible();
-  await expect(page.getByText("Inserted: £1.00")).toBeVisible();
+  await expect(page.getByText("Inserted £1.00")).toBeVisible();
   await expect(page.getByRole("button", { name: /Ramune/ })).toHaveAttribute(
     "aria-pressed",
     "true",

@@ -1,0 +1,58 @@
+.shelf {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  column-gap: var(--space-xs);
+  padding: var(--space-xs) var(--space-s);
+  background: var(--color-glass);
+  border: 1px solid var(--color-text);
+  border-radius: var(--radius);
+  box-shadow: 0 0 0 0.5rem var(--color-surface);
+  margin: 0.5rem;
+}
+
+.shelf li {
+  display: flex;
+  border-bottom: 1px solid var(--color-text);
+}
+
+.product {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0;
+  padding: 0.7rem var(--space-xs) 0.5rem;
+  font-size: var(--font-s);
+  line-height: 1.25;
+  background: transparent;
+  border: 0;
+  border-radius: 0;
+  cursor: pointer;
+}
+
+.product img {
+  height: 3.6rem;
+  margin-bottom: var(--space-xs);
+}
+
+.product img {
+  transition: transform 120ms;
+}
+
+.product:hover:not(:disabled):not([aria-pressed="true"]) img {
+  transform: translateY(-2px);
+}
+
+.product[aria-pressed="true"] {
+  background: color-mix(in srgb, var(--color-surface) 70%, var(--color-glass));
+}
+
+.product[aria-pressed="true"] strong {
+  color: var(--color-selected);
+}
+
+.product:focus-visible {
+  outline: 2px solid var(--color-focus);
+  outline-offset: -2px;
+}

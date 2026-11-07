@@ -1,0 +1,7 @@
+.tray {
+  height: 3.2rem;
+  background: var(--color-surface);
+  border: 0.48rem solid var(--color-cabinet-shade);
+  border-radius: var(--radius);
+  box-shadow: 0 0 0 2px var(--color-text);
+}

@@ -1,0 +1,12 @@
+.marquee {
+  padding: 0.5rem 0.6rem;
+  text-align: center;
+  font-size: var(--font-l);
+  font-weight: 600;
+  letter-spacing: 0.15em;
+  text-indent: 0.15em;
+  background: var(--color-surface);
+  border: var(--line);
+  border-radius: var(--radius);
+  box-shadow: 0.32rem 0.32rem 0 var(--color-cabinet-shade);
+}

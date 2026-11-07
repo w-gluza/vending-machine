@@ -1,0 +1,35 @@
+.slot {
+  display: grid;
+  place-items: center;
+  width: 3.2rem;
+  height: 1.2rem;
+  background: var(--color-cabinet-shade);
+  border: var(--line);
+  border-radius: var(--radius-s);
+}
+
+.slot span {
+  width: 60%;
+  height: 0.24rem;
+  background: var(--color-text);
+  border-radius: var(--radius-pill);
+}
+
+.flash {
+  animation: flash 500ms ease-out;
+}
+
+@keyframes flash {
+  0% {
+    background: var(--color-text);
+    box-shadow: none;
+  }
+  25% {
+    background: var(--color-coin-gold);
+    box-shadow: 0 0 0.5rem var(--color-coin-gold);
+  }
+  100% {
+    background: var(--color-text);
+    box-shadow: none;
+  }
+}

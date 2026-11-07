@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
   coinLabel,
+  coinsToStacks,
   countCoins,
   createInitialInventory,
   inventoryToStacks,
@@ -99,5 +100,19 @@ describe("removeFromInventory", () => {
     expect(() => removeFromInventory(createInitialInventory(), bad)).toThrow(
       RangeError,
     );
+  });
+});
+
+describe("coinsToStacks", () => {
+  it("groups loose coins into stacks, largest first, skipping absent denominations", () => {
+    expect(coinsToStacks([20, 100, 20, 1])).toEqual([
+      { denomination: 100, count: 1 },
+      { denomination: 20, count: 2 },
+      { denomination: 1, count: 1 },
+    ]);
+  });
+
+  it("returns no stacks for no coins", () => {
+    expect(coinsToStacks([])).toEqual([]);
   });
 });

@@ -73,7 +73,7 @@ describe("purchase flow through the real routes", () => {
 
     const short = await buy({
       customerId: "chen",
-      productId: "cup-noodle",
+      productId: "coffee",
       paidInPence: 200,
     });
     expect(short.status).toBe(422);

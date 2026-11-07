@@ -1,0 +1,10 @@
+.coins {
+  display: grid;
+  grid-template-columns: repeat(4, auto);
+  gap: var(--space-s);
+  justify-content: start;
+}
+
+.totals {
+  font-size: var(--font-s);
+}

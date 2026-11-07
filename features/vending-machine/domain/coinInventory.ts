@@ -13,6 +13,14 @@ export const isDenomination = (value: number): value is Denomination =>
 export const coinLabel = (denomination: Denomination): string =>
   denomination >= 100 ? `£${denomination / 100}` : `${denomination}p`;
 
+export const coinMetal = (
+  denomination: Denomination,
+): "copper" | "silver" | "gold" => {
+  if (denomination <= 2) return "copper";
+  if (denomination <= 50) return "silver";
+  return "gold";
+};
+
 const assertValidCount = (count: number, label: string): void => {
   if (!Number.isSafeInteger(count) || count < 0) {
     throw new RangeError(`Invalid coin count ${count} for ${label}`);
@@ -50,6 +58,12 @@ export const inventoryToStacks = (coins: CoinInventory): CoinStack[] =>
   DENOMINATIONS.map((denomination) => ({
     denomination,
     count: coins[denomination],
+  }));
+
+export const coinsToStacks = (coins: readonly Denomination[]): CoinStack[] =>
+  DENOMINATIONS.filter((d) => coins.includes(d)).map((denomination) => ({
+    denomination,
+    count: coins.filter((c) => c === denomination).length,
   }));
 
 export const countCoins = (stacks: readonly CoinStack[]): number =>
