@@ -1,16 +1,66 @@
 .button {
-  border: 2px solid black;
-  background: white;
-  padding: 0.5rem 0.75rem;
+  --shadow: 0.2rem;
+  padding: 0.48rem var(--space-s);
+  font-size: var(--font);
+  white-space: nowrap;
+  font-weight: 600;
+  line-height: 1.2;
+  color: var(--color-text);
+  background: var(--color-surface);
+  border: var(--line);
+  border-radius: var(--radius-s);
+  box-shadow: var(--shadow) var(--shadow) 0 var(--color-text);
   cursor: pointer;
+  transition:
+    transform 80ms,
+    box-shadow 80ms;
+}
+
+.s {
+  padding: 0.32rem 0.6rem;
+  font-size: var(--font-s);
+}
+
+.primary {
+  background: var(--color-confirm);
+}
+
+.danger {
+  color: var(--color-text-inverse);
+  background: var(--color-danger);
+}
+
+.button:hover:not(:disabled) {
+  transform: translate(-0.05rem, -0.05rem);
+  box-shadow: calc(var(--shadow) + 0.05rem) calc(var(--shadow) + 0.05rem) 0
+    var(--color-text);
+}
+
+.button:active:not(:disabled) {
+  transform: translate(var(--shadow), var(--shadow));
+  box-shadow: none;
 }
 
 .button[aria-pressed="true"] {
-  background: black;
-  color: white;
+  color: var(--color-text-inverse);
+  background: var(--color-selected);
 }
 
-.button:disabled {
-  opacity: 0.4;
+.button:focus-visible {
+  outline: 3px solid var(--color-focus);
+  outline-offset: 2px;
+}
+
+.button:disabled[aria-pressed="true"] {
+  opacity: 0.8;
+  cursor: not-allowed;
+}
+
+.button:disabled:not([aria-pressed="true"]) {
+  color: color-mix(in srgb, var(--color-text) 45%, var(--color-surface));
+  border-color: color-mix(in srgb, var(--color-text) 45%, var(--color-surface));
+  background: var(--color-surface);
+  box-shadow: none;
+  transform: none;
   cursor: not-allowed;
 }

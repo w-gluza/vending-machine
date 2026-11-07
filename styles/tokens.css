@@ -1,0 +1,15 @@
+:root {
+  --line: 2px solid var(--color-text);
+  --radius-s: 0.6rem;
+  --radius: 0.8rem;
+  --radius-pill: 999px;
+  --space-xs: 0.2rem;
+  --space-s: 0.4rem;
+  --space: 0.8rem;
+  --space-l: 1.2rem;
+  --shadow-offset: 0.16rem 0.2rem 0;
+
+  --font-s: 0.75rem;
+  --font: 0.875rem;
+  --font-l: 1.25rem;
+}

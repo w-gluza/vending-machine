@@ -1,7 +1,11 @@
 import styles from "./Coin.module.css";
 
+type CoinMetal = "copper" | "silver" | "gold";
+
 type CoinProps = {
   label: string;
+  metal?: CoinMetal;
+  size?: "s" | "m";
   count?: number;
   onClick?: () => void;
   disabled?: boolean;
@@ -9,25 +13,28 @@ type CoinProps = {
 
 export const Coin = ({
   label,
+  metal = "silver",
+  size = "m",
   count,
   onClick,
   disabled = false,
 }: CoinProps) => {
+  const className = `${styles.coin} ${styles[metal]} ${styles[size]}`;
   const content = (
     <>
       <span>{label}</span>
-      {count !== undefined && <span className={styles.count}>x{count}</span>}
+      {count !== undefined && <span className={styles.count}>{count}</span>}
     </>
   );
 
   if (!onClick) {
-    return <span className={styles.coin}>{content}</span>;
+    return <span className={className}>{content}</span>;
   }
 
   return (
     <button
       type="button"
-      className={styles.coin}
+      className={className}
       onClick={onClick}
       disabled={disabled}
       aria-label={`Insert ${label}`}

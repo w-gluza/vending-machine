@@ -1,0 +1,16 @@
+.card {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-s);
+  padding: var(--space-s) var(--space);
+  background: var(--color-surface);
+  border: var(--line);
+  border-radius: var(--radius);
+  box-shadow: 0.2rem 0.2rem 0 var(--color-text);
+}
+
+.title {
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+}
