@@ -117,14 +117,41 @@ describe("POST /api/purchase", () => {
     expect((await handler(post(valid))).status).toBe(200);
   });
 
-  it("still answers 429 when a throttled request carries a malformed payment", async () => {
+  it.each([
+    ["an object", { toString: null, valueOf: null }],
+    ["a negative number", -1],
+    ["a fraction", 1.5],
+    ["a string", "100"],
+  ])(
+    "still answers 429 with a zero echo when a throttled payment is %s",
+    async (_, paidInPence) => {
+      const handler = createPurchaseHandler(instances());
+      for (let i = 0; i < 3; i++) await handler(post(valid));
+      const response = await handler(post({ ...valid, paidInPence }));
+      expect(response.status).toBe(429);
+      expect(await response.json()).toMatchObject({ paidInPence: 0 });
+    },
+  );
+
+  it("treats spacing and casing variants of a customer id as one customer", async () => {
     const handler = createPurchaseHandler(instances());
-    for (let i = 0; i < 3; i++) await handler(post(valid));
-    const response = await handler(
-      post({ ...valid, paidInPence: { toString: null, valueOf: null } }),
+    for (const customerId of ["Alice", " alice ", "ALICE"]) {
+      expect((await handler(post({ ...valid, customerId }))).status).toBe(200);
+    }
+    expect(
+      (await handler(post({ ...valid, customerId: "alice" }))).status,
+    ).toBe(429);
+  });
+
+  it("serves three simultaneous purchases from one customer and refuses the fourth", async () => {
+    const shared = instances();
+    const handler = createPurchaseHandler(shared);
+    const responses = await Promise.all(
+      Array.from({ length: 4 }, () => handler(post(valid))),
     );
-    expect(response.status).toBe(429);
-    expect(await response.json()).toMatchObject({ paidInPence: 0 });
+    expect(responses.map((r) => r.status).sort()).toEqual([200, 200, 200, 429]);
+    const machine = await (await createMachineHandler(shared)()).json();
+    expect(machine).toMatchObject({ cashBoxInPence: 300 });
   });
 
   it("does not rate limit a request without a valid customer id", async () => {

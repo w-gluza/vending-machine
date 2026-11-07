@@ -23,4 +23,11 @@ test("a customer buys ramune with a pound and gets 15p back", async ({
     "false",
   );
   await expect(page.getByText(/Cash box: £1\.00\./)).toBeVisible();
+
+  await page.reload();
+  await expect(page.getByText(/Cash box: £1\.00\./)).toBeVisible();
+  await expect(page.getByText("Inserted: £0.00")).toBeVisible();
+  await expect(
+    page.getByText("Pick a product, insert coins, press Buy."),
+  ).toBeVisible();
 });

@@ -18,14 +18,19 @@ export const isJsonObject = (
 ): value is Record<string, unknown> =>
   typeof value === "object" && value !== null && !Array.isArray(value);
 
+const normaliseCustomerId = (value: string): string =>
+  value.trim().toLowerCase();
+
 export const validateCustomerId = (value: unknown): Validated<string> => {
-  if (typeof value !== "string" || value.trim().length === 0) {
+  const normalised =
+    typeof value === "string" ? normaliseCustomerId(value) : "";
+  if (normalised.length === 0) {
     return {
       ok: false,
       issues: [{ field: "customerId", message: "must be a non-empty string" }],
     };
   }
-  if (value.length > MAX_CUSTOMER_ID_LENGTH) {
+  if (normalised.length > MAX_CUSTOMER_ID_LENGTH) {
     return {
       ok: false,
       issues: [
@@ -36,7 +41,7 @@ export const validateCustomerId = (value: unknown): Validated<string> => {
       ],
     };
   }
-  return { ok: true, value: value.trim() };
+  return { ok: true, value: normalised };
 };
 
 const productIssue = (value: unknown): ValidationIssue | null => {
