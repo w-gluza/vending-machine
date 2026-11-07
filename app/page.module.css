@@ -1,0 +1,8 @@
+.scene {
+  min-height: 100vh;
+  overflow: hidden;
+  padding-bottom: 2.4rem;
+  background: var(--image-landscape) center / cover no-repeat;
+  display: grid;
+  place-items: end center;
+}

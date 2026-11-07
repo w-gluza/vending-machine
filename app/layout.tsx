@@ -1,6 +1,9 @@
 import type { Metadata } from "next";
 import "@/styles/reset.css";
+import "@/styles/themes/jp.css";
+import "@/styles/tokens.css";
 import "@/styles/globals.css";
+import { catalogue } from "@/data/catalogues";
 import { Providers } from "./providers";
 
 const title = "Vending machine";
@@ -21,7 +24,7 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
-    <html lang="en">
+    <html lang="en" data-theme={catalogue.id}>
       <body>
         <Providers>{children}</Providers>
       </body>
