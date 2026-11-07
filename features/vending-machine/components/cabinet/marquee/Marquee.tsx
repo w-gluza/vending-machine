@@ -1,7 +1,8 @@
+import type { Catalogue } from "@/data/catalogues/types";
 import styles from "./Marquee.module.css";
 
 type MarqueeProps = {
-  brand: { text: string; lang: string };
+  brand: Catalogue["brand"];
 };
 
 export const Marquee = ({ brand }: MarqueeProps) => (

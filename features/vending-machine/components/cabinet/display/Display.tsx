@@ -18,7 +18,7 @@ export const Display = ({
   message,
   tone = "neutral",
 }: DisplayProps) => (
-  <output className={styles.display} aria-live="polite">
+  <div className={styles.display}>
     <p className={styles.credit}>
       <span className={styles.label}>Inserted</span> <strong>{inserted}</strong>
     </p>
@@ -27,6 +27,8 @@ export const Display = ({
       <span>{productName ?? "None selected"}</span>{" "}
       <strong>{price ?? "-"}</strong>
     </p>
-    <div className={`${styles.message} ${styles[tone]}`}>{message}</div>
-  </output>
+    <div role="status" className={`${styles.message} ${styles[tone]}`}>
+      {message}
+    </div>
+  </div>
 );

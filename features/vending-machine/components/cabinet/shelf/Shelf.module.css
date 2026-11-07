@@ -21,7 +21,6 @@
   flex-direction: column;
   align-items: center;
   justify-content: flex-end;
-  gap: 0;
   padding: 0.7rem var(--space-xs) 0.5rem;
   font-size: var(--font-s);
   line-height: 1.25;
@@ -34,9 +33,6 @@
 .product img {
   height: 3.6rem;
   margin-bottom: var(--space-xs);
-}
-
-.product img {
   transition: transform 120ms;
 }
 

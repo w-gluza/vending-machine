@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { customers } from "@/data/customers";
-import { products } from "@/data/products";
+import { catalogue } from "@/data/catalogues";
 import { formatMoney } from "@/lib/formatMoney";
 import { coinsToStacks, stacksTotal } from "./domain/coinInventory";
 import type {
@@ -45,6 +45,7 @@ export const VendingMachine = ({ initialSnapshot }: VendingMachineProps) => {
   const { snapshot, result, error, isPurchasing, purchase, clearOutcome } =
     usePurchase(initialSnapshot);
 
+  const { products } = catalogue;
   const selectedProduct =
     products.find((p) => p.id === selectedProductId) ?? null;
   const insertedInPence = insertedCoins.reduce((sum, coin) => sum + coin, 0);
@@ -96,6 +97,7 @@ export const VendingMachine = ({ initialSnapshot }: VendingMachineProps) => {
   return (
     <div className={styles.stage}>
       <Cabinet
+        brand={catalogue.brand}
         products={products}
         selectedProduct={selectedProduct}
         onSelectProduct={selectProduct}

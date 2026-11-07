@@ -28,7 +28,15 @@ export const Coin = ({
   );
 
   if (!onClick) {
-    return <span className={className}>{content}</span>;
+    return (
+      <span
+        role="img"
+        aria-label={count === undefined ? label : `${label}, ${count} coins`}
+        className={className}
+      >
+        {content}
+      </span>
+    );
   }
 
   return (

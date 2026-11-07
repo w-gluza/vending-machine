@@ -1,7 +1,6 @@
 import type { ReactNode } from "react";
 import { Button } from "@/components/button/Button";
-import { catalogue } from "@/data/catalogues";
-import type { Product } from "@/data/products";
+import type { Catalogue, Product } from "@/data/catalogues/types";
 import type { CoinStack } from "../../domain/types";
 import { formatMoney } from "@/lib/formatMoney";
 import { CoinReturn } from "./coin-return/CoinReturn";
@@ -13,6 +12,7 @@ import { Tray } from "./tray/Tray";
 import styles from "./Cabinet.module.css";
 
 type CabinetProps = {
+  brand: Catalogue["brand"];
   products: readonly Product[];
   selectedProduct: Product | null;
   onSelectProduct: (id: string) => void;
@@ -27,6 +27,7 @@ type CabinetProps = {
 };
 
 export const Cabinet = ({
+  brand,
   products,
   selectedProduct,
   onSelectProduct,
@@ -41,7 +42,7 @@ export const Cabinet = ({
 }: CabinetProps) => (
   <div className={styles.cabinet}>
     <div className={styles.header}>
-      <Marquee brand={catalogue.brand} />
+      <Marquee brand={brand} />
     </div>
 
     <div className={styles.shelf}>
