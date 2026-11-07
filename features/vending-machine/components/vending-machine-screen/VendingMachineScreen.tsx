@@ -19,9 +19,8 @@ export const VendingMachineScreen = ({
     null,
   );
   const [insertedInPence, setInsertedInPence] = useState(0);
-  const { snapshot, result, status, error, purchase, clearOutcome } =
+  const { snapshot, result, error, isPurchasing, purchase, clearOutcome } =
     usePurchase(initialSnapshot);
-  const isPurchasing = status === "loading";
 
   const selectedProduct =
     products.find((p) => p.id === selectedProductId) ?? null;

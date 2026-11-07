@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import "@/styles/reset.css";
 import "@/styles/globals.css";
+import { Providers } from "./providers";
 
 const title = "Vending machine";
 const description =
@@ -21,7 +22,9 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html lang="en">
-      <body>{children}</body>
+      <body>
+        <Providers>{children}</Providers>
+      </body>
     </html>
   );
 }
