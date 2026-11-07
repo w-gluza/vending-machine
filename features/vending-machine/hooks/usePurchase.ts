@@ -18,7 +18,9 @@ export const usePurchase = (initialSnapshot: MachineSnapshot) => {
 
   const mutation = useMutation({
     mutationFn: requestPurchase,
-    onSuccess: (result) => {
+    networkMode: "always",
+    onSuccess: async (result) => {
+      await queryClient.cancelQueries({ queryKey: machineQueryKey });
       queryClient.setQueryData(machineQueryKey, result.machine);
     },
   });
