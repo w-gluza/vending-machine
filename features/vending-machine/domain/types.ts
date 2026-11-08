@@ -9,6 +9,8 @@ import type {
 
 export const DENOMINATIONS = [200, 100, 50, 20, 10, 5, 2, 1] as const;
 
+export const MAX_CREDIT_IN_PENCE = 1_000;
+
 export type Denomination = (typeof DENOMINATIONS)[number];
 
 export type CoinInventory = z.infer<typeof coinInventorySchema>;

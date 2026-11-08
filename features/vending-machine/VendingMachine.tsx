@@ -8,7 +8,7 @@ import { catalogue } from "@/data/catalogues";
 import { formatMoney } from "@/lib/formatMoney";
 import { coinsToStacks } from "./domain/coinInventory";
 import type { CoinStack, Denomination, MachineSnapshot } from "./domain/types";
-import { displayFor } from "./displayFor";
+import { displayFor, type DisplayMessage } from "./displayFor";
 import { useAutoClear } from "./hooks/useAutoClear";
 import { useMachineSnapshot } from "./hooks/useMachineSnapshot";
 import { usePurchase } from "./hooks/usePurchase";
@@ -55,7 +55,23 @@ export const VendingMachine = ({
   const selectedProduct =
     products.find((p) => p.id === selectedProductId) ?? null;
   const insertedInPence = insertedCoins.reduce((sum, coin) => sum + coin, 0);
-  const display = displayFor(result, error, returnedCoins);
+  const display = displayFor(result, error, returnedCoins, insertedInPence);
+
+  const renderMessage = (message: DisplayMessage) => {
+    switch (message.kind) {
+      case "returned":
+        return <p>Returned {formatMoney(message.amountInPence)}.</p>;
+      case "max_credit":
+        return (
+          <p>
+            Maximum credit {formatMoney(message.maxInPence)}. Press Buy or
+            return your coins.
+          </p>
+        );
+      case "outcome":
+        return <Outcome result={result} error={error} />;
+    }
+  };
 
   useAutoClear(result?.ok ? result : null, clearOutcome, SUCCESS_DISPLAY_MS);
   useAutoClear(
@@ -161,13 +177,7 @@ export const VendingMachine = ({
           onSelectProduct={selectProduct}
           insertedInPence={insertedInPence}
           insertCount={insertedCoins.length}
-          message={
-            display.message.kind === "returned" ? (
-              <p>Returned {formatMoney(display.message.amountInPence)}.</p>
-            ) : (
-              <Outcome result={result} error={error} />
-            )
-          }
+          message={renderMessage(display.message)}
           tone={display.tone}
           change={display.change}
           onPurchase={handlePurchase}
@@ -176,7 +186,12 @@ export const VendingMachine = ({
           disabled={busy}
         />
       </div>
-      <Wallet className={styles.wallet} onInsert={insert} disabled={busy} />
+      <Wallet
+        className={styles.wallet}
+        insertedInPence={insertedInPence}
+        onInsert={insert}
+        disabled={busy}
+      />
     </div>
   );
 };

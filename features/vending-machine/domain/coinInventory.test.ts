@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import {
+  canInsert,
   coinLabel,
   coinsToStacks,
   countCoins,
@@ -8,7 +9,11 @@ import {
   removeFromInventory,
   stacksTotal,
 } from "./coinInventory";
-import { DENOMINATIONS, type CoinInventory } from "./types";
+import {
+  DENOMINATIONS,
+  MAX_CREDIT_IN_PENCE,
+  type CoinInventory,
+} from "./types";
 
 describe("createInitialInventory", () => {
   it("starts with ten of every denomination by default", () => {
@@ -104,5 +109,18 @@ describe("coinsToStacks", () => {
 
   it("returns no stacks for no coins", () => {
     expect(coinsToStacks([])).toEqual([]);
+  });
+});
+
+describe("canInsert", () => {
+  it("accepts a coin that keeps the credit at or under the maximum", () => {
+    expect(canInsert(0, 200)).toBe(true);
+    expect(canInsert(MAX_CREDIT_IN_PENCE - 200, 200)).toBe(true);
+  });
+
+  it("refuses a coin that would take the credit past the maximum, but still takes a smaller one", () => {
+    expect(canInsert(MAX_CREDIT_IN_PENCE - 100, 200)).toBe(false);
+    expect(canInsert(MAX_CREDIT_IN_PENCE - 100, 100)).toBe(true);
+    expect(canInsert(MAX_CREDIT_IN_PENCE, 1)).toBe(false);
   });
 });

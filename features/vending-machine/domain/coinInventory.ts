@@ -1,5 +1,6 @@
 import {
   DENOMINATIONS,
+  MAX_CREDIT_IN_PENCE,
   type CoinInventory,
   type CoinStack,
   type Denomination,
@@ -9,6 +10,11 @@ export const INITIAL_COINS_PER_DENOMINATION = 10;
 
 export const isDenomination = (value: number): value is Denomination =>
   (DENOMINATIONS as readonly number[]).includes(value);
+
+export const canInsert = (
+  insertedInPence: number,
+  denomination: Denomination,
+): boolean => insertedInPence + denomination <= MAX_CREDIT_IN_PENCE;
 
 export const coinLabel = (denomination: Denomination): string =>
   denomination >= 100 ? `£${denomination / 100}` : `${denomination}p`;

@@ -1,9 +1,15 @@
 import type { DisplayTone } from "./components/cabinet/display/Display";
 import { stacksTotal } from "./domain/coinInventory";
-import type { CoinStack, PurchaseResult } from "./domain/types";
+import {
+  MAX_CREDIT_IN_PENCE,
+  type CoinStack,
+  type PurchaseResult,
+} from "./domain/types";
 
 export type DisplayMessage =
-  { kind: "outcome" } | { kind: "returned"; amountInPence: number };
+  | { kind: "outcome" }
+  | { kind: "returned"; amountInPence: number }
+  | { kind: "max_credit"; maxInPence: number };
 
 export type MachineDisplay = {
   tone: DisplayTone;
@@ -15,9 +21,11 @@ export const displayFor = (
   result: PurchaseResult | null,
   error: string | null,
   returnedCoins: readonly CoinStack[],
+  insertedInPence: number,
 ): MachineDisplay => {
-  if (error)
+  if (error) {
     return { tone: "refused", message: { kind: "outcome" }, change: [] };
+  }
   if (result) {
     return result.ok
       ? { tone: "ok", message: { kind: "outcome" }, change: result.change }
@@ -28,6 +36,13 @@ export const displayFor = (
       tone: "neutral",
       message: { kind: "returned", amountInPence: stacksTotal(returnedCoins) },
       change: returnedCoins,
+    };
+  }
+  if (insertedInPence >= MAX_CREDIT_IN_PENCE) {
+    return {
+      tone: "neutral",
+      message: { kind: "max_credit", maxInPence: MAX_CREDIT_IN_PENCE },
+      change: [],
     };
   }
   return { tone: "neutral", message: { kind: "outcome" }, change: [] };

@@ -1,15 +1,17 @@
 import { Coin } from "@/components/coin/Coin";
-import { coinLabel, coinMetal } from "../../domain/coinInventory";
+import { canInsert, coinLabel, coinMetal } from "../../domain/coinInventory";
 import { DENOMINATIONS, type Denomination } from "../../domain/types";
 import styles from "./Wallet.module.css";
 
 type WalletProps = {
+  insertedInPence: number;
   onInsert: (denomination: Denomination) => void;
   disabled?: boolean;
   className?: string;
 };
 
 export const Wallet = ({
+  insertedInPence,
   onInsert,
   disabled = false,
   className,
@@ -24,7 +26,7 @@ export const Wallet = ({
           label={coinLabel(denomination)}
           metal={coinMetal(denomination)}
           onClick={() => onInsert(denomination)}
-          disabled={disabled}
+          disabled={disabled || !canInsert(insertedInPence, denomination)}
         />
       </li>
     ))}
