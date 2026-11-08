@@ -13,6 +13,7 @@ const post = (body: unknown) =>
   });
 
 const order = { customerId: "alice", productId: "ramune", paidInPence: 100 };
+const enabled = () => true;
 
 describe("POST /api/machine/reset", () => {
   it("returns the machine to its seed state after purchases", async () => {
@@ -24,7 +25,7 @@ describe("POST /api/machine/reset", () => {
       limiter: createInMemoryRateLimiter(),
     };
 
-    const response = await createResetHandler(instances)();
+    const response = await createResetHandler(instances, enabled)();
 
     expect(response.status).toBe(200);
     expect(await response.json()).toEqual({
@@ -43,7 +44,7 @@ describe("POST /api/machine/reset", () => {
     for (let i = 0; i < 3; i += 1) await purchase(post(order));
     expect((await purchase(post(order))).status).toBe(429);
 
-    await createResetHandler(instances)();
+    await createResetHandler(instances, enabled)();
 
     expect((await purchase(post(order))).status).toBe(200);
   });
@@ -52,8 +53,26 @@ describe("POST /api/machine/reset", () => {
     const store = createInMemoryStore();
     const { state, version } = await store.load();
 
-    await createResetHandler({ store, limiter: createInMemoryRateLimiter() })();
+    await createResetHandler(
+      { store, limiter: createInMemoryRateLimiter() },
+      enabled,
+    )();
 
     expect(await store.save(state, version)).toBe(false);
+  });
+
+  it("answers 404 and leaves the machine alone when reset is disabled", async () => {
+    const store = createInMemoryStore({
+      coins: createInitialInventory(0),
+      cashBoxInPence: 500,
+    });
+
+    const response = await createResetHandler(
+      { store, limiter: createInMemoryRateLimiter() },
+      () => false,
+    )();
+
+    expect(response.status).toBe(404);
+    expect((await store.load()).state.cashBoxInPence).toBe(500);
   });
 });

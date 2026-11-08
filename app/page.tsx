@@ -1,6 +1,7 @@
 import { VendingMachine } from "@/features/vending-machine";
 import { getInstances } from "@/server/instance";
 import { getSnapshot } from "@/server/machine/getSnapshot";
+import { isResetEnabled } from "@/server/resetEnabled";
 import styles from "./page.module.css";
 
 export const dynamic = "force-dynamic";
@@ -9,7 +10,10 @@ export default async function Home() {
   const snapshot = await getSnapshot(getInstances().store);
   return (
     <main className={styles.page}>
-      <VendingMachine initialSnapshot={snapshot} />
+      <VendingMachine
+        initialSnapshot={snapshot}
+        resetEnabled={isResetEnabled()}
+      />
     </main>
   );
 }

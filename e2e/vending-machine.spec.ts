@@ -67,9 +67,7 @@ test("an offline purchase fails at once and keeps the coins in", async ({
   await context.setOffline(true);
   await page.getByRole("button", { name: "Buy" }).click();
   await expect(
-    page.getByText(
-      "Could not reach the machine. Your coins are still inserted.",
-    ),
+    page.getByText("Purchase not confirmed. It may have gone through."),
   ).toBeVisible();
   await expect(page.getByText("Inserted £1.00")).toBeVisible();
   await expect(page.getByRole("button", { name: /Ramune/ })).toHaveAttribute(
@@ -128,4 +126,30 @@ test("a slow machine read cannot overwrite a newer purchase", async ({
   await staleLanded;
   await page.waitForTimeout(200);
   expect(await cashBox(page)).toBeCloseTo(before + 1, 2);
+});
+
+test("every control is locked while a reset is pending", async ({ page }) => {
+  await page.goto("/");
+  await page.getByRole("button", { name: "Ren" }).click();
+  await page.getByRole("button", { name: "Insert £1" }).click();
+  await expect(page.getByText("Inserted £1.00")).toBeVisible();
+
+  let release: () => void = () => {};
+  const held = new Promise<void>((resolve) => {
+    release = resolve;
+  });
+  await page.route("**/api/machine/reset", async (route) => {
+    await held;
+    await route.continue();
+  });
+
+  await page.getByRole("button", { name: "Service visit" }).click();
+  await expect(page.getByRole("button", { name: "Insert £1" })).toBeDisabled();
+  await expect(page.getByRole("button", { name: "Buy" })).toBeDisabled();
+  await expect(page.getByRole("button", { name: /Ramune/ })).toBeDisabled();
+  await expect(page.getByRole("button", { name: "Sui" })).toBeDisabled();
+
+  release();
+  await expect(page.getByRole("button", { name: "Insert £1" })).toBeEnabled();
+  await expect(page.getByText("Inserted £0.00")).toBeVisible();
 });

@@ -24,6 +24,7 @@ type CabinetProps = {
   onPurchase: () => void;
   onReturn: () => void;
   isPurchasing: boolean;
+  disabled: boolean;
   className?: string;
 };
 
@@ -40,6 +41,7 @@ export const Cabinet = ({
   onPurchase,
   onReturn,
   isPurchasing,
+  disabled,
   className,
 }: CabinetProps) => (
   <div className={[styles.cabinet, className].filter(Boolean).join(" ")}>
@@ -52,7 +54,7 @@ export const Cabinet = ({
         products={products}
         selectedId={selectedProduct?.id ?? null}
         onSelect={onSelectProduct}
-        disabled={isPurchasing}
+        disabled={disabled}
       />
     </div>
 
@@ -70,14 +72,14 @@ export const Cabinet = ({
       <Button
         variant="primary"
         onClick={onPurchase}
-        disabled={isPurchasing || !selectedProduct}
+        disabled={disabled || !selectedProduct}
       >
         {isPurchasing ? "Buying..." : "Buy"}
       </Button>
       <Button
         variant="danger"
         onClick={onReturn}
-        disabled={isPurchasing || insertedInPence === 0}
+        disabled={disabled || insertedInPence === 0}
       >
         Return coins
       </Button>

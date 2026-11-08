@@ -2,7 +2,7 @@
 
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { requestPurchase } from "../api/requestPurchase";
-import { replaceMachineSnapshot } from "./useMachineSnapshot";
+import { machineQueryKey, replaceMachineSnapshot } from "./useMachineSnapshot";
 
 export const usePurchase = () => {
   const queryClient = useQueryClient();
@@ -11,6 +11,7 @@ export const usePurchase = () => {
     mutationFn: requestPurchase,
     networkMode: "always",
     onSuccess: (result) => replaceMachineSnapshot(queryClient, result.machine),
+    onError: () => queryClient.invalidateQueries({ queryKey: machineQueryKey }),
   });
 
   const submit = (customerId: string, productId: string, paidInPence: number) =>

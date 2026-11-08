@@ -24,9 +24,13 @@ const SUCCESS_DISPLAY_MS = 5_000;
 
 type VendingMachineProps = {
   initialSnapshot: MachineSnapshot;
+  resetEnabled: boolean;
 };
 
-export const VendingMachine = ({ initialSnapshot }: VendingMachineProps) => {
+export const VendingMachine = ({
+  initialSnapshot,
+  resetEnabled,
+}: VendingMachineProps) => {
   const [customerId, setCustomerId] = useState(customers[0]);
   const [selectedProductId, setSelectedProductId] = useState<string | null>(
     null,
@@ -40,6 +44,7 @@ export const VendingMachine = ({ initialSnapshot }: VendingMachineProps) => {
   const { result } = purchase;
   const error = purchase.error ?? reset.error;
   const isPurchasing = purchase.isPending;
+  const busy = purchase.isPending || reset.isPending;
 
   const clearOutcome = () => {
     purchase.clear();
@@ -86,6 +91,7 @@ export const VendingMachine = ({ initialSnapshot }: VendingMachineProps) => {
   };
 
   const handleReset = async () => {
+    if (busy) return;
     const fresh = await reset.run();
     if (!fresh) return;
     clearOutcome();
@@ -95,7 +101,7 @@ export const VendingMachine = ({ initialSnapshot }: VendingMachineProps) => {
   };
 
   const handlePurchase = async () => {
-    if (isPurchasing || !selectedProduct) return;
+    if (busy || !selectedProduct) return;
     const outcome = await purchase.submit(
       customerId,
       selectedProduct.id,
@@ -114,7 +120,7 @@ export const VendingMachine = ({ initialSnapshot }: VendingMachineProps) => {
           customers={customers}
           customerId={customerId}
           onSelect={selectCustomer}
-          disabled={isPurchasing}
+          disabled={busy}
         />
         <div className={styles.actions}>
           <Button
@@ -127,15 +133,17 @@ export const VendingMachine = ({ initialSnapshot }: VendingMachineProps) => {
           >
             <span aria-hidden="true">£</span>
           </Button>
-          <Button
-            size="s"
-            onClick={handleReset}
-            disabled={isPurchasing || reset.isPending}
-            aria-label="Reset machine"
-            title="Reset machine"
-          >
-            <ResetIcon />
-          </Button>
+          {resetEnabled ? (
+            <Button
+              size="s"
+              onClick={handleReset}
+              disabled={busy}
+              aria-label="Service visit"
+              title="Service visit: the operator collects the cash box and refills the coins. The machine never refills itself."
+            >
+              <ResetIcon />
+            </Button>
+          ) : null}
         </div>
         {statsOpen ? (
           <MachineStatus
@@ -165,13 +173,10 @@ export const VendingMachine = ({ initialSnapshot }: VendingMachineProps) => {
           onPurchase={handlePurchase}
           onReturn={returnCoins}
           isPurchasing={isPurchasing}
+          disabled={busy}
         />
       </div>
-      <Wallet
-        className={styles.wallet}
-        onInsert={insert}
-        disabled={isPurchasing}
-      />
+      <Wallet className={styles.wallet} onInsert={insert} disabled={busy} />
     </div>
   );
 };

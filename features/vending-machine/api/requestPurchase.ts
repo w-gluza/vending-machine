@@ -8,8 +8,10 @@ export type PurchaseRequestInput = {
   paidInPence: number;
 };
 
-const UNREACHABLE_MESSAGE =
-  "Could not reach the machine. Your coins are still inserted.";
+export const PURCHASE_TIMEOUT_MS = 10_000;
+
+export const UNCONFIRMED_MESSAGE =
+  "Purchase not confirmed. It may have gone through.";
 
 const readJson = async (response: Response): Promise<unknown> => {
   try {
@@ -28,9 +30,10 @@ export const requestPurchase = async (
       method: "POST",
       headers: { "content-type": "application/json" },
       body: JSON.stringify(input),
+      signal: AbortSignal.timeout(PURCHASE_TIMEOUT_MS),
     });
   } catch {
-    throw new Error(UNREACHABLE_MESSAGE);
+    throw new Error(UNCONFIRMED_MESSAGE);
   }
 
   const parsed = parsePurchaseResponse(
