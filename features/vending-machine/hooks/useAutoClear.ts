@@ -1,19 +1,15 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useEffectEvent } from "react";
 
 export const useAutoClear = <T>(
   value: T | null,
   clear: () => void,
   delayMs: number,
 ) => {
-  const clearRef = useRef(clear);
-
-  useEffect(() => {
-    clearRef.current = clear;
-  }, [clear]);
+  const onTimeout = useEffectEvent(clear);
 
   useEffect(() => {
     if (value === null) return;
-    const timer = setTimeout(() => clearRef.current(), delayMs);
+    const timer = setTimeout(() => onTimeout(), delayMs);
     return () => clearTimeout(timer);
   }, [value, delayMs]);
 };

@@ -6,33 +6,21 @@ import { ResetIcon } from "@/components/icons/ResetIcon";
 import { customers } from "@/data/customers";
 import { catalogue } from "@/data/catalogues";
 import { formatMoney } from "@/lib/formatMoney";
-import { coinsToStacks, stacksTotal } from "./domain/coinInventory";
-import type {
-  CoinStack,
-  Denomination,
-  MachineSnapshot,
-  PurchaseResult,
-} from "./domain/types";
+import { coinsToStacks } from "./domain/coinInventory";
+import type { CoinStack, Denomination, MachineSnapshot } from "./domain/types";
+import { displayFor } from "./displayFor";
 import { useAutoClear } from "./hooks/useAutoClear";
+import { useMachineSnapshot } from "./hooks/useMachineSnapshot";
 import { usePurchase } from "./hooks/usePurchase";
+import { useReset } from "./hooks/useReset";
 import { MachineStatus } from "./components/machine-status/MachineStatus";
 import { UserControls } from "./components/user-controls/UserControls";
-import type { DisplayTone } from "./components/cabinet/display/Display";
 import { Outcome } from "./components/cabinet/outcome/Outcome";
 import { Cabinet } from "./components/cabinet/Cabinet";
 import { Wallet } from "./components/wallet/Wallet";
 import styles from "./VendingMachine.module.css";
 
 const SUCCESS_DISPLAY_MS = 5_000;
-
-const toneFor = (
-  result: PurchaseResult | null,
-  error: string | null,
-): DisplayTone => {
-  if (error) return "refused";
-  if (!result) return "neutral";
-  return result.ok ? "ok" : "refused";
-};
 
 type VendingMachineProps = {
   initialSnapshot: MachineSnapshot;
@@ -46,21 +34,23 @@ export const VendingMachine = ({ initialSnapshot }: VendingMachineProps) => {
   const [insertedCoins, setInsertedCoins] = useState<Denomination[]>([]);
   const [returnedCoins, setReturnedCoins] = useState<CoinStack[]>([]);
   const [statsOpen, setStatsOpen] = useState(false);
-  const {
-    snapshot,
-    result,
-    error,
-    isPurchasing,
-    isResetting,
-    purchase,
-    reset,
-    clearOutcome,
-  } = usePurchase(initialSnapshot);
+  const snapshot = useMachineSnapshot(initialSnapshot);
+  const purchase = usePurchase();
+  const reset = useReset();
+  const { result } = purchase;
+  const error = purchase.error ?? reset.error;
+  const isPurchasing = purchase.isPending;
+
+  const clearOutcome = () => {
+    purchase.clear();
+    reset.clear();
+  };
 
   const { products } = catalogue;
   const selectedProduct =
     products.find((p) => p.id === selectedProductId) ?? null;
   const insertedInPence = insertedCoins.reduce((sum, coin) => sum + coin, 0);
+  const display = displayFor(result, error, returnedCoins);
 
   useAutoClear(result?.ok ? result : null, clearOutcome, SUCCESS_DISPLAY_MS);
   useAutoClear(
@@ -96,8 +86,9 @@ export const VendingMachine = ({ initialSnapshot }: VendingMachineProps) => {
   };
 
   const handleReset = async () => {
-    const snapshot = await reset();
-    if (!snapshot) return;
+    const fresh = await reset.run();
+    if (!fresh) return;
+    clearOutcome();
     setInsertedCoins([]);
     setSelectedProductId(null);
     setReturnedCoins([]);
@@ -105,7 +96,7 @@ export const VendingMachine = ({ initialSnapshot }: VendingMachineProps) => {
 
   const handlePurchase = async () => {
     if (isPurchasing || !selectedProduct) return;
-    const outcome = await purchase(
+    const outcome = await purchase.submit(
       customerId,
       selectedProduct.id,
       insertedInPence,
@@ -139,20 +130,20 @@ export const VendingMachine = ({ initialSnapshot }: VendingMachineProps) => {
           <Button
             size="s"
             onClick={handleReset}
-            disabled={isPurchasing || isResetting}
+            disabled={isPurchasing || reset.isPending}
             aria-label="Reset machine"
             title="Reset machine"
           >
             <ResetIcon />
           </Button>
         </div>
-        {statsOpen && (
+        {statsOpen ? (
           <MachineStatus
             id="machine-stats"
             className={styles.stats}
             snapshot={snapshot}
           />
-        )}
+        ) : null}
       </header>
       <div className={styles.scene}>
         <Cabinet
@@ -163,14 +154,14 @@ export const VendingMachine = ({ initialSnapshot }: VendingMachineProps) => {
           insertedInPence={insertedInPence}
           insertCount={insertedCoins.length}
           message={
-            returnedCoins.length > 0 && !result && !error ? (
-              <p>Returned {formatMoney(stacksTotal(returnedCoins))}.</p>
+            display.message.kind === "returned" ? (
+              <p>Returned {formatMoney(display.message.amountInPence)}.</p>
             ) : (
               <Outcome result={result} error={error} />
             )
           }
-          tone={toneFor(result, error)}
-          change={result?.ok ? result.change : returnedCoins}
+          tone={display.tone}
+          change={display.change}
           onPurchase={handlePurchase}
           onReturn={returnCoins}
           isPurchasing={isPurchasing}
