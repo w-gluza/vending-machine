@@ -9,7 +9,7 @@ export type Db = {
 };
 
 const STATEMENT_TIMEOUT_MS = 5_000;
-const CONNECTION_TIMEOUT_MS = 5_000;
+const CONNECTION_TIMEOUT_MS = 10_000;
 const IDLE_TIMEOUT_MS = 10_000;
 const MAX_CONNECTIONS = 2;
 

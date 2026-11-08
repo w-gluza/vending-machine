@@ -3,7 +3,7 @@ import { createInMemoryStore } from "@/server/machine/inMemoryStore";
 import { createInMemoryRateLimiter } from "@/server/rate-limit/inMemoryRateLimiter";
 import { createMachineHandler } from "./machineHandler";
 import { createPurchaseHandler } from "./purchaseHandler";
-import { MAX_PENCE } from "./validation";
+import { MAX_CREDIT_IN_PENCE } from "@/features/vending-machine/domain/types";
 import { productId } from "@/test/fixtures";
 
 const instances = () => ({
@@ -158,7 +158,10 @@ describe("POST /api/purchase", () => {
     ["a numeric product id", { ...valid, productId: 1 }],
     ["a fractional payment", { ...valid, paidInPence: 99.5 }],
     ["a negative payment", { ...valid, paidInPence: -1 }],
-    ["a payment above the cap", { ...valid, paidInPence: MAX_PENCE + 1 }],
+    [
+      "a payment above the credit limit",
+      { ...valid, paidInPence: MAX_CREDIT_IN_PENCE + 1 },
+    ],
   ])("returns 400 for %s", async (_label, body) => {
     const response = await createPurchaseHandler(instances())(post(body));
     expect(response.status).toBe(400);
@@ -174,6 +177,31 @@ describe("POST /api/purchase", () => {
       "productId",
       "paidInPence",
     ]);
+  });
+
+  it("tells a big spender where the credit limit is", async () => {
+    const response = await createPurchaseHandler(instances())(
+      post({ ...valid, paidInPence: MAX_CREDIT_IN_PENCE + 1 }),
+    );
+    expect(response.status).toBe(400);
+    expect(await response.json()).toMatchObject({
+      issues: [
+        {
+          field: "paidInPence",
+          message: "Steady on, big spender. This machine takes £10.00 at most.",
+        },
+      ],
+    });
+  });
+
+  it("accepts a payment exactly at the credit limit", async () => {
+    const response = await createPurchaseHandler(instances())(
+      post({ ...valid, paidInPence: MAX_CREDIT_IN_PENCE }),
+    );
+    expect(response.status).toBe(200);
+    expect(await response.json()).toMatchObject({
+      changeDueInPence: MAX_CREDIT_IN_PENCE - 85,
+    });
   });
 
   it("ignores any price sent by the client and uses the catalogue", async () => {

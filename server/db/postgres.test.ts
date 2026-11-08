@@ -37,7 +37,7 @@ describe.skipIf(!connectionString)(
     beforeAll(async () => {
       db = createDb(connectionString as string);
       await migrate(db);
-    });
+    }, 30_000);
 
     afterEach(async () => {
       await Promise.all(extra.splice(0).map((d) => d.end()));

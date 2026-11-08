@@ -1,8 +1,9 @@
 import { z } from "zod";
 import { products, type Product } from "@/data/products";
+import { MAX_CREDIT_IN_PENCE } from "@/features/vending-machine/domain/types";
+import { formatMoney } from "@/lib/formatMoney";
 
 export const MAX_CUSTOMER_ID_LENGTH = 64;
-export const MAX_PENCE = 100_000;
 
 export type ValidationIssue = { field: string; message: string };
 
@@ -42,7 +43,10 @@ const orderSchema = z
     paidInPence: z
       .int("must be a non-negative integer number of pence")
       .nonnegative("must be a non-negative integer number of pence")
-      .max(MAX_PENCE, `must be at most ${MAX_PENCE}`),
+      .max(
+        MAX_CREDIT_IN_PENCE,
+        `Steady on, big spender. This machine takes ${formatMoney(MAX_CREDIT_IN_PENCE)} at most.`,
+      ),
   })
   .transform(({ productId, paidInPence }) => ({
     product: productId,
