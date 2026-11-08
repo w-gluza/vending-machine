@@ -10,5 +10,6 @@ export type Catalogue = {
   readonly id: string;
   readonly name: string;
   readonly brand: { readonly text: string; readonly lang: string };
+  readonly themeColor: string;
   readonly products: readonly Product[];
 };

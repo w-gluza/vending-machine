@@ -4,6 +4,7 @@ export const jp: Catalogue = {
   id: "jp",
   name: "Japan",
   brand: { text: "富士自動販売機", lang: "ja" },
+  themeColor: "#b5c5c9",
   products: [
     {
       id: "be9c420f-78cf-499b-8f4a-835dd6865462",
