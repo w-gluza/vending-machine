@@ -6,11 +6,6 @@ export const MAX_PENCE = 100_000;
 
 export type ValidationIssue = { field: string; message: string };
 
-export type ValidationError = {
-  error: "validation";
-  issues: ValidationIssue[];
-};
-
 export type Validated<T> =
   { ok: true; value: T } | { ok: false; issues: ValidationIssue[] };
 
@@ -32,17 +27,27 @@ const customerIdSchema = z
       ),
   );
 
-const isKnownProductId = (id: string) => products.some((p) => p.id === id);
+const productSchema = z
+  .string("must be a known product id")
+  .transform((id, ctx): Product => {
+    const product = products.find((p) => p.id === id);
+    if (product) return product;
+    ctx.addIssue({ code: "custom", message: "must be a known product id" });
+    return z.NEVER;
+  });
 
-const orderSchema = z.object({
-  productId: z
-    .string("must be a known product id")
-    .refine(isKnownProductId, "must be a known product id"),
-  paidInPence: z
-    .int("must be a non-negative integer number of pence")
-    .nonnegative("must be a non-negative integer number of pence")
-    .max(MAX_PENCE, `must be at most ${MAX_PENCE}`),
-});
+const orderSchema = z
+  .object({
+    productId: productSchema,
+    paidInPence: z
+      .int("must be a non-negative integer number of pence")
+      .nonnegative("must be a non-negative integer number of pence")
+      .max(MAX_PENCE, `must be at most ${MAX_PENCE}`),
+  })
+  .transform(({ productId, paidInPence }) => ({
+    product: productId,
+    paidInPence,
+  }));
 
 const toIssues = (error: z.ZodError): ValidationIssue[] => {
   const seen = new Set<string>();
@@ -67,15 +72,13 @@ export const validateCustomerId = (value: unknown): Validated<string> => {
       };
 };
 
-export type ValidatedOrder = { product: Product; paidInPence: number };
+export type ValidatedOrder = z.infer<typeof orderSchema>;
 
 export const validateOrder = (
   body: Record<string, unknown>,
 ): Validated<ValidatedOrder> => {
   const result = orderSchema.safeParse(body);
-  if (!result.success) return { ok: false, issues: toIssues(result.error) };
-  const product = products.find(
-    (p) => p.id === result.data.productId,
-  ) as Product;
-  return { ok: true, value: { product, paidInPence: result.data.paidInPence } };
+  return result.success
+    ? { ok: true, value: result.data }
+    : { ok: false, issues: toIssues(result.error) };
 };

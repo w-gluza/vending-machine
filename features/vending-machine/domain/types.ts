@@ -5,7 +5,6 @@ import type {
   machineSnapshotSchema,
   purchaseRefusalSchema,
   purchaseResultSchema,
-  rateLimitRefusalSchema,
 } from "./schemas";
 
 export const DENOMINATIONS = [200, 100, 50, 20, 10, 5, 2, 1] as const;
@@ -23,17 +22,7 @@ export type PurchaseInput = {
   paidInPence: number;
 };
 
-export type PurchaseRequest = PurchaseInput & {
-  customerId: string;
-};
-
 export type PurchaseRefusal = z.infer<typeof purchaseRefusalSchema>;
-
-export type RateLimitRefusal = z.infer<typeof rateLimitRefusalSchema>;
-
-export type PurchaseRefusalReason = PurchaseRefusal["reason"];
-
-export type RefusalReason = PurchaseRefusalReason | RateLimitRefusal["reason"];
 
 export type PurchaseDecision =
   | {
