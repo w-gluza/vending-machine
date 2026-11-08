@@ -31,7 +31,7 @@ export const VendingMachine = ({
   initialSnapshot,
   resetEnabled,
 }: VendingMachineProps) => {
-  const [customerId, setCustomerId] = useState(customers[0]);
+  const [customerId, setCustomerId] = useState(customers[0].id);
   const [selectedProductId, setSelectedProductId] = useState<string | null>(
     null,
   );

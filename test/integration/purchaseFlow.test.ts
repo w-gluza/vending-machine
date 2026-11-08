@@ -4,6 +4,7 @@ import type { MachineSnapshot } from "@/features/vending-machine/domain/types";
 import { createInMemoryStore } from "@/server/machine/inMemoryStore";
 import type { MachineState } from "@/server/machine/store";
 import { createInMemoryRateLimiter } from "@/server/rate-limit/inMemoryRateLimiter";
+import { productId } from "@/test/fixtures";
 
 type Order = { customerId: string; productId: string; paidInPence: number };
 
@@ -32,7 +33,7 @@ const bootMachine = async (initial?: MachineState) => {
 
 const ramune = (customerId: string, paidInPence: number): Order => ({
   customerId,
-  productId: "ramune",
+  productId: productId("ramune"),
   paidInPence,
 });
 
@@ -73,7 +74,7 @@ describe("purchase flow through the real routes", () => {
 
     const short = await purchase({
       customerId: "chen",
-      productId: "coffee",
+      productId: productId("coffee"),
       paidInPence: 200,
     });
     expect(short.status).toBe(422);

@@ -4,6 +4,7 @@ import { createInMemoryRateLimiter } from "@/server/rate-limit/inMemoryRateLimit
 import { createMachineHandler } from "./machineHandler";
 import { createPurchaseHandler } from "./purchaseHandler";
 import { MAX_PENCE } from "./validation";
+import { productId } from "@/test/fixtures";
 
 const instances = () => ({
   store: createInMemoryStore(),
@@ -17,7 +18,11 @@ const post = (body: unknown) =>
     body: typeof body === "string" ? body : JSON.stringify(body),
   });
 
-const valid = { customerId: "alice", productId: "ramune", paidInPence: 100 };
+const valid = {
+  customerId: "alice",
+  productId: productId("ramune"),
+  paidInPence: 100,
+};
 
 describe("POST /api/purchase", () => {
   it("dispenses with 200 and returns change and the machine snapshot", async () => {
@@ -65,7 +70,7 @@ describe("POST /api/purchase", () => {
       }),
     });
     const response = await handler(
-      post({ ...valid, productId: "green-tea", paidInPence: 150 }),
+      post({ ...valid, productId: productId("green-tea"), paidInPence: 150 }),
     );
     expect(response.status).toBe(409);
     expect(await response.json()).toMatchObject({

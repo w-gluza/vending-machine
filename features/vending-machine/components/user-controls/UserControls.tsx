@@ -1,8 +1,9 @@
 import { Button } from "@/components/button/Button";
+import type { Customer } from "@/data/customers";
 import styles from "./UserControls.module.css";
 
 type UserControlsProps = {
-  customers: readonly string[];
+  customers: readonly Customer[];
   customerId: string;
   onSelect: (id: string) => void;
   disabled?: boolean;
@@ -21,14 +22,14 @@ export const UserControls = ({
     aria-label="Who is buying"
   >
     {customers.map((customer) => (
-      <li key={customer}>
+      <li key={customer.id}>
         <Button
           size="s"
-          selected={customer === customerId}
-          onClick={() => onSelect(customer)}
+          selected={customer.id === customerId}
+          onClick={() => onSelect(customer.id)}
           disabled={disabled}
         >
-          {customer}
+          {customer.name}
         </Button>
       </li>
     ))}

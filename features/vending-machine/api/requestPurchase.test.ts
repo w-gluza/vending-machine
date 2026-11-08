@@ -6,8 +6,13 @@ import {
   resetMachine,
   UNCONFIRMED_MESSAGE,
 } from "./requestPurchase";
+import { productId } from "@/test/fixtures";
 
-const input = { customerId: "sui", productId: "ramune", paidInPence: 100 };
+const input = {
+  customerId: "alice",
+  productId: productId("ramune"),
+  paidInPence: 100,
+};
 
 afterEach(() => {
   vi.unstubAllGlobals();

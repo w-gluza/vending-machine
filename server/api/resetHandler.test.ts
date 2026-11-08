@@ -4,6 +4,7 @@ import { createInMemoryInstances } from "@/server/instance";
 import { createInMemoryStore } from "@/server/machine/inMemoryStore";
 import { createPurchaseHandler } from "./purchaseHandler";
 import { createResetHandler } from "./resetHandler";
+import { productId } from "@/test/fixtures";
 
 const post = (body: unknown) =>
   new Request("http://localhost/api/purchase", {
@@ -12,7 +13,11 @@ const post = (body: unknown) =>
     body: JSON.stringify(body),
   });
 
-const order = { customerId: "alice", productId: "ramune", paidInPence: 100 };
+const order = {
+  customerId: "alice",
+  productId: productId("ramune"),
+  paidInPence: 100,
+};
 const enabled = () => true;
 
 describe("POST /api/machine/reset", () => {

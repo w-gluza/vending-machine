@@ -1,5 +1,6 @@
 export type Product = {
   readonly id: string;
+  readonly slug: string;
   readonly name: string;
   readonly priceInPence: number;
   readonly image: string;
