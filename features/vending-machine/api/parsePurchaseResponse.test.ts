@@ -3,7 +3,9 @@ import { createInitialInventory } from "../domain/coinInventory";
 import {
   BUSY_MESSAGE,
   parsePurchaseResponse,
+  UNCONFIRMED_MESSAGE,
   UNEXPECTED_RESPONSE_MESSAGE,
+  UNREADABLE_SUCCESS_MESSAGE,
 } from "./parsePurchaseResponse";
 
 const machine = {
@@ -97,38 +99,43 @@ describe("parsePurchaseResponse", () => {
   });
 
   it.each([
-    ["a JSON 500", 500, { error: "unavailable" }],
-    ["a 200 without a machine snapshot", 200, { ...dispensed, machine: null }],
-    ["a 200 with a string body", 200, "ok"],
-    ["a refusal without a reason", 422, { ...refused, reason: undefined }],
-    ["a non-JSON body", 200, null],
-    ["an empty 400", 400, {}],
+    ["a 200 without a machine snapshot", { ...dispensed, machine: null }],
+    ["a 200 with a string body", "ok"],
+    ["a non-JSON body", null],
     [
       "a success without changeDueInPence",
-      200,
       { ...dispensed, changeDueInPence: undefined },
     ],
     [
       "a success with an unknown coin",
-      200,
       { ...dispensed, change: [{ denomination: 3, count: 1 }] },
     ],
     [
       "a success with a zero-count stack",
-      200,
       { ...dispensed, change: [{ denomination: 10, count: 0 }] },
     ],
     [
       "an empty inventory",
-      200,
       { ...dispensed, machine: { ...machine, coins: {} } },
     ],
     [
       "a negative cash box",
-      200,
       { ...dispensed, machine: { ...machine, cashBoxInPence: -1 } },
     ],
-    ["a fractional price", 200, { ...dispensed, priceInPence: 85.5 }],
+    ["a fractional price", { ...dispensed, priceInPence: 85.5 }],
+  ])(
+    "reports a purchase that went through but could not be read on %s",
+    (_, body) => {
+      expect(parsePurchaseResponse(200, body)).toEqual({
+        kind: "failure",
+        message: UNREADABLE_SUCCESS_MESSAGE,
+      });
+    },
+  );
+
+  it.each([
+    ["a refusal without a reason", 422, { ...refused, reason: undefined }],
+    ["an empty 400", 400, {}],
     [
       "a short payment without the shortfall",
       422,
@@ -140,10 +147,22 @@ describe("parsePurchaseResponse", () => {
       429,
       { ...refused, reason: "rate_limited", shortfallInPence: undefined },
     ],
-  ])("fails safely on %s", (_, status, body) => {
+    ["a 409 with no body", 409, null],
+  ])("keeps the coins inserted on %s", (_, status, body) => {
     expect(parsePurchaseResponse(status, body)).toEqual({
       kind: "failure",
       message: UNEXPECTED_RESPONSE_MESSAGE,
+    });
+  });
+
+  it.each([
+    ["a JSON 500", 500, { error: "unavailable" }],
+    ["a 502 with no body", 502, null],
+    ["an unknown 2xx", 204, null],
+  ])("leaves the outcome unconfirmed on %s", (_, status, body) => {
+    expect(parsePurchaseResponse(status, body)).toEqual({
+      kind: "failure",
+      message: UNCONFIRMED_MESSAGE,
     });
   });
 });

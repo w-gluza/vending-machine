@@ -1,6 +1,11 @@
 import { machineSnapshotSchema } from "../domain/schemas";
 import type { MachineSnapshot, PurchaseResult } from "../domain/types";
-import { parsePurchaseResponse } from "./parsePurchaseResponse";
+import {
+  parsePurchaseResponse,
+  UNCONFIRMED_MESSAGE,
+} from "./parsePurchaseResponse";
+
+export { UNCONFIRMED_MESSAGE } from "./parsePurchaseResponse";
 
 export type PurchaseRequestInput = {
   customerId: string;
@@ -8,10 +13,7 @@ export type PurchaseRequestInput = {
   paidInPence: number;
 };
 
-export const PURCHASE_TIMEOUT_MS = 10_000;
-
-export const UNCONFIRMED_MESSAGE =
-  "Purchase not confirmed. It may have gone through.";
+export const REQUEST_TIMEOUT_MS = 10_000;
 
 const readJson = async (response: Response): Promise<unknown> => {
   try {
@@ -30,7 +32,7 @@ export const requestPurchase = async (
       method: "POST",
       headers: { "content-type": "application/json" },
       body: JSON.stringify(input),
-      signal: AbortSignal.timeout(PURCHASE_TIMEOUT_MS),
+      signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS),
     });
   } catch {
     throw new Error(UNCONFIRMED_MESSAGE);
@@ -53,12 +55,19 @@ const readSnapshot = async (response: Response): Promise<MachineSnapshot> => {
 };
 
 export const fetchMachine = async (): Promise<MachineSnapshot> =>
-  readSnapshot(await fetch("/api/machine"));
+  readSnapshot(
+    await fetch("/api/machine", {
+      signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS),
+    }),
+  );
 
 export const resetMachine = async (): Promise<MachineSnapshot> => {
   let response: Response;
   try {
-    response = await fetch("/api/machine/reset", { method: "POST" });
+    response = await fetch("/api/machine/reset", {
+      method: "POST",
+      signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS),
+    });
   } catch {
     throw new Error("Could not reach the machine to reset it.");
   }

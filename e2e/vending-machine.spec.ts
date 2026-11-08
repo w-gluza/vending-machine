@@ -153,3 +153,21 @@ test("every control is locked while a reset is pending", async ({ page }) => {
   await expect(page.getByRole("button", { name: "Insert £1" })).toBeEnabled();
   await expect(page.getByText("Inserted £0.00")).toBeVisible();
 });
+
+test("a stalled machine refresh does not hide a failed purchase", async ({
+  page,
+}) => {
+  await page.goto("/");
+  await page.getByRole("button", { name: /Ramune/ }).click();
+  await page.getByRole("button", { name: "Insert £1" }).click();
+  await page.route("**/api/purchase", (route) => route.abort("failed"));
+  await page.route("**/api/machine", () => new Promise<void>(() => {}));
+
+  await page.getByRole("button", { name: "Buy" }).click();
+
+  await expect(
+    page.getByText("Purchase not confirmed. It may have gone through."),
+  ).toBeVisible();
+  await expect(page.getByRole("button", { name: "Buy" })).toBeEnabled();
+  await expect(page.getByText("Inserted £1.00")).toBeVisible();
+});

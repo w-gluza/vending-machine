@@ -11,7 +11,9 @@ export const usePurchase = () => {
     mutationFn: requestPurchase,
     networkMode: "always",
     onSuccess: (result) => replaceMachineSnapshot(queryClient, result.machine),
-    onError: () => queryClient.invalidateQueries({ queryKey: machineQueryKey }),
+    onError: () => {
+      void queryClient.invalidateQueries({ queryKey: machineQueryKey });
+    },
   });
 
   const submit = (customerId: string, productId: string, paidInPence: number) =>

@@ -9,6 +9,7 @@ export const useReset = () => {
 
   const mutation = useMutation({
     mutationFn: resetMachine,
+    networkMode: "always",
     onSuccess: (snapshot) => replaceMachineSnapshot(queryClient, snapshot),
   });
 
