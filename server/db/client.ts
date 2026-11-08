@@ -23,6 +23,10 @@ export const createDb = (connectionString: string): Db => {
     query_timeout: STATEMENT_TIMEOUT_MS,
   });
 
+  pool.on("error", (error) => {
+    console.error(`Database connection error: ${error.message}`);
+  });
+
   return {
     async query(text, params = []) {
       const result = await pool.query(text, params);
