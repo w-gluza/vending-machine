@@ -6,12 +6,6 @@
   padding: var(--space) var(--space-l);
 }
 
-@media (max-width: 40rem) {
-  .coins {
-    padding-bottom: calc(var(--space) + 0.75rem);
-  }
-}
-
 @media (min-width: 40rem) {
   .coins {
     flex-direction: column;
