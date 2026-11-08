@@ -12,10 +12,28 @@
   position: sticky;
   top: 0;
   z-index: 1;
-  display: flex;
-  flex-wrap: wrap;
+  display: grid;
+  grid-template-columns: 1fr auto;
+  grid-template-areas:
+    "customers actions"
+    "stats stats";
   align-items: center;
-  justify-content: space-between;
+  gap: var(--space);
+  padding: var(--space) var(--space-l);
+}
+
+.customers {
+  grid-area: customers;
+}
+
+.actions {
+  grid-area: actions;
+  display: flex;
+  gap: var(--space-s);
+}
+
+.stats {
+  grid-area: stats;
 }
 
 .scene {
@@ -35,6 +53,11 @@
 }
 
 @media (min-width: 40rem) {
+  .stats {
+    justify-self: end;
+    min-width: 18rem;
+  }
+
   .layout {
     grid-template-columns: 1fr auto 1fr;
     grid-template-rows: auto 1fr;

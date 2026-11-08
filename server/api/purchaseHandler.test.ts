@@ -195,7 +195,7 @@ describe("POST /api/purchase", () => {
 describe("POST /api/purchase under contention", () => {
   it("answers 503 with Retry-After when the state keeps changing underneath", async () => {
     const inner = createInMemoryStore();
-    const alwaysStale = { load: () => inner.load(), save: async () => false };
+    const alwaysStale = { ...inner, save: async () => false };
     const response = await createPurchaseHandler({
       store: alwaysStale,
       limiter: createInMemoryRateLimiter(),

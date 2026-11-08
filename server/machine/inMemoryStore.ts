@@ -1,11 +1,11 @@
-import { createInitialInventory } from "@/features/vending-machine/domain/coinInventory";
-import type { MachineState, MachineStore } from "./store";
+import {
+  createInitialState,
+  type MachineState,
+  type MachineStore,
+} from "./store";
 
 export const createInMemoryStore = (
-  initial: MachineState = {
-    coins: createInitialInventory(),
-    cashBoxInPence: 0,
-  },
+  initial: MachineState = createInitialState(),
 ): MachineStore => {
   let state = structuredClone(initial);
   let version = 0;
@@ -19,6 +19,10 @@ export const createInMemoryStore = (
       state = structuredClone(next);
       version += 1;
       return true;
+    },
+    async reset() {
+      state = createInitialState();
+      version += 1;
     },
   };
 };

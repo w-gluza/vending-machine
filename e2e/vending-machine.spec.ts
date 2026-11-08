@@ -1,5 +1,9 @@
 import { expect, test } from "@playwright/test";
 
+test.beforeEach(async ({ request }) => {
+  await request.post("/api/machine/reset");
+});
+
 test("a customer buys ramune with a pound and gets 15p back", async ({
   page,
 }) => {
@@ -22,21 +26,26 @@ test("a customer buys ramune with a pound and gets 15p back", async ({
     "aria-pressed",
     "false",
   );
-  await expect(cashBoxValue(page)).toHaveText("£1.00");
+  await expect(await cashBoxValue(page)).toHaveText("£1.00");
 
   await page.reload();
-  await expect(cashBoxValue(page)).toHaveText("£1.00");
+  await expect(await cashBoxValue(page)).toHaveText("£1.00");
   await expect(page.getByText("Inserted £0.00")).toBeVisible();
   await expect(
     page.getByText("Choose a drink, insert your coins, and press Buy."),
   ).toBeVisible();
 });
 
-const cashBoxValue = (page: import("@playwright/test").Page) =>
-  page.locator('dt:has-text("Cash box") + dd');
+const cashBoxValue = async (page: import("@playwright/test").Page) => {
+  const toggle = page.getByRole("button", { name: "Machine stats" });
+  if ((await toggle.getAttribute("aria-expanded")) !== "true") {
+    await toggle.click();
+  }
+  return page.locator('dt:has-text("Cash box") + dd');
+};
 
 const cashBox = async (page: import("@playwright/test").Page) => {
-  const text = await cashBoxValue(page).textContent();
+  const text = await (await cashBoxValue(page)).textContent();
   return Number(/£(\d+\.\d\d)/.exec(text ?? "")?.[1]);
 };
 

@@ -1,7 +1,11 @@
 "use client";
 
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { fetchMachine, requestPurchase } from "../api/requestPurchase";
+import {
+  fetchMachine,
+  requestPurchase,
+  resetMachine,
+} from "../api/requestPurchase";
 import type { MachineSnapshot } from "../domain/types";
 
 export const machineQueryKey = ["machine"] as const;
@@ -25,6 +29,17 @@ export const usePurchase = (initialSnapshot: MachineSnapshot) => {
     },
   });
 
+  const resetMutation = useMutation({
+    mutationFn: resetMachine,
+    onSuccess: async (snapshot) => {
+      await queryClient.cancelQueries({ queryKey: machineQueryKey });
+      queryClient.setQueryData(machineQueryKey, snapshot);
+      mutation.reset();
+    },
+  });
+
+  const reset = () => resetMutation.mutateAsync().catch(() => null);
+
   const purchase = (
     customerId: string,
     productId: string,
@@ -37,9 +52,14 @@ export const usePurchase = (initialSnapshot: MachineSnapshot) => {
   return {
     snapshot,
     result: mutation.data ?? null,
-    error: mutation.error?.message ?? null,
+    error: mutation.error?.message ?? resetMutation.error?.message ?? null,
     isPurchasing: mutation.isPending,
+    isResetting: resetMutation.isPending,
     purchase,
-    clearOutcome: mutation.reset,
+    reset,
+    clearOutcome: () => {
+      mutation.reset();
+      resetMutation.reset();
+    },
   };
 };

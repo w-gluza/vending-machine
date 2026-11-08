@@ -1,6 +1,9 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { Button } from "@/components/button/Button";
+import { ResetIcon } from "@/components/icons/ResetIcon";
+import { StatsIcon } from "@/components/icons/StatsIcon";
 import { customers } from "@/data/customers";
 import { catalogue } from "@/data/catalogues";
 import { formatMoney } from "@/lib/formatMoney";
@@ -42,8 +45,17 @@ export const VendingMachine = ({ initialSnapshot }: VendingMachineProps) => {
   );
   const [insertedCoins, setInsertedCoins] = useState<Denomination[]>([]);
   const [returnedCoins, setReturnedCoins] = useState<CoinStack[]>([]);
-  const { snapshot, result, error, isPurchasing, purchase, clearOutcome } =
-    usePurchase(initialSnapshot);
+  const [statsOpen, setStatsOpen] = useState(false);
+  const {
+    snapshot,
+    result,
+    error,
+    isPurchasing,
+    isResetting,
+    purchase,
+    reset,
+    clearOutcome,
+  } = usePurchase(initialSnapshot);
 
   const { products } = catalogue;
   const selectedProduct =
@@ -82,6 +94,14 @@ export const VendingMachine = ({ initialSnapshot }: VendingMachineProps) => {
     setInsertedCoins([]);
   };
 
+  const handleReset = async () => {
+    const snapshot = await reset();
+    if (!snapshot) return;
+    setInsertedCoins([]);
+    setSelectedProductId(null);
+    setReturnedCoins([]);
+  };
+
   const handlePurchase = async () => {
     if (isPurchasing || !selectedProduct) return;
     const outcome = await purchase(
@@ -98,12 +118,40 @@ export const VendingMachine = ({ initialSnapshot }: VendingMachineProps) => {
     <div className={styles.layout}>
       <header className={styles.header}>
         <UserControls
+          className={styles.customers}
           customers={customers}
           customerId={customerId}
           onSelect={selectCustomer}
           disabled={isPurchasing}
         />
-        <MachineStatus snapshot={snapshot} />
+        <div className={styles.actions}>
+          <Button
+            size="s"
+            onClick={() => setStatsOpen((open) => !open)}
+            aria-expanded={statsOpen}
+            aria-controls="machine-stats"
+            aria-label="Machine stats"
+            title="Machine stats"
+          >
+            <StatsIcon />
+          </Button>
+          <Button
+            size="s"
+            onClick={handleReset}
+            disabled={isPurchasing || isResetting}
+            aria-label="Reset machine"
+            title="Reset machine"
+          >
+            <ResetIcon />
+          </Button>
+        </div>
+        {statsOpen && (
+          <MachineStatus
+            id="machine-stats"
+            className={styles.stats}
+            snapshot={snapshot}
+          />
+        )}
       </header>
       <div className={styles.scene}>
         <Cabinet

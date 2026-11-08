@@ -41,11 +41,23 @@ export const requestPurchase = async (
   return parsed.result;
 };
 
-export const fetchMachine = async (): Promise<MachineSnapshot> => {
-  const response = await fetch("/api/machine");
+const readSnapshot = async (response: Response): Promise<MachineSnapshot> => {
   const parsed = machineSnapshotSchema.safeParse(await readJson(response));
   if (!response.ok || !parsed.success) {
     throw new Error("The machine gave an unexpected answer.");
   }
   return parsed.data;
+};
+
+export const fetchMachine = async (): Promise<MachineSnapshot> =>
+  readSnapshot(await fetch("/api/machine"));
+
+export const resetMachine = async (): Promise<MachineSnapshot> => {
+  let response: Response;
+  try {
+    response = await fetch("/api/machine/reset", { method: "POST" });
+  } catch {
+    throw new Error("Could not reach the machine to reset it.");
+  }
+  return readSnapshot(response);
 };

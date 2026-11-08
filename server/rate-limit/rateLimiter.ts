@@ -4,6 +4,7 @@ export type RateLimitDecision =
 
 export type RateLimiter = {
   attempt(key: string, now: number): Promise<RateLimitDecision>;
+  reset(): Promise<void>;
 };
 
 export const RATE_LIMIT_ATTEMPTS = 3;

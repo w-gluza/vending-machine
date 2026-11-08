@@ -1,4 +1,8 @@
 .button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-xs);
   --shadow: 0.2rem;
   padding: 0.48rem var(--space-s);
   font-size: var(--font);
@@ -41,7 +45,8 @@
   box-shadow: none;
 }
 
-.button[aria-pressed="true"] {
+.button[aria-pressed="true"],
+.button[aria-expanded="true"] {
   color: var(--color-text-inverse);
   background: var(--color-selected);
 }

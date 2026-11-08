@@ -2,11 +2,4 @@
   display: flex;
   flex-wrap: wrap;
   gap: var(--space-s);
-  padding: var(--space) var(--space-l);
-}
-
-@media (max-width: 40rem) {
-  .customers {
-    padding: var(--space-s) var(--space-l);
-  }
 }

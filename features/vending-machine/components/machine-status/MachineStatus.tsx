@@ -3,17 +3,23 @@ import type { MachineSnapshot } from "../../domain/types";
 import styles from "./MachineStatus.module.css";
 
 type MachineStatusProps = {
+  id: string;
   snapshot: MachineSnapshot;
   className?: string;
 };
 
-export const MachineStatus = ({ snapshot, className }: MachineStatusProps) => (
+export const MachineStatus = ({
+  id,
+  snapshot,
+  className,
+}: MachineStatusProps) => (
   <dl
-    className={[styles.totals, className].filter(Boolean).join(" ")}
+    id={id}
+    className={[styles.panel, className].filter(Boolean).join(" ")}
     aria-label="Inside the machine"
   >
     <div>
-      <dt>Change</dt>
+      <dt>Available change</dt>
       <dd>{formatMoney(snapshot.changeAvailableInPence)}</dd>
     </div>
     <div>

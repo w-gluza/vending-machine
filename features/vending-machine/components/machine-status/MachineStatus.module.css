@@ -1,24 +1,21 @@
-.totals {
-  display: flex;
-  gap: var(--space-l);
+.panel {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space);
   padding: var(--space) var(--space-l);
+  background: var(--color-surface);
+  border-radius: var(--radius);
   font-variant-numeric: tabular-nums;
 }
 
-.totals dt {
+.panel dt {
   font-size: var(--font-s);
   opacity: 0.7;
 }
 
-.totals dd {
-  margin: 0;
+.panel dd {
+  margin: var(--space-xs) 0 0;
   font-size: var(--font-l);
   font-weight: 600;
   line-height: 1.1;
-}
-
-@media (max-width: 40rem) {
-  .totals {
-    padding: var(--space-s) var(--space-l);
-  }
 }

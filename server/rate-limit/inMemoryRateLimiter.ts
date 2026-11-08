@@ -51,6 +51,9 @@ export const createInMemoryRateLimiter = (
         ? { allowed, remaining: limit - recent.length - 1 }
         : { allowed, retryAfterMs: recent[0] + windowMs - now };
     },
+    async reset() {
+      attempts.clear();
+    },
     trackedKeys: () => attempts.size,
   };
 };

@@ -90,7 +90,7 @@ describe("purchase", () => {
     const inner = createInMemoryStore();
     let failedOnce = false;
     const racing: MachineStore = {
-      load: () => inner.load(),
+      ...inner,
       async save(next, expectedVersion) {
         if (!failedOnce) {
           failedOnce = true;
@@ -144,12 +144,12 @@ describe("purchase", () => {
     const inner = createInMemoryStore();
     let loads = 0;
     const flaky: MachineStore = {
+      ...inner,
       load: () => {
         loads += 1;
         if (loads === 1) throw new Error("database hiccup");
         return inner.load();
       },
-      save: (next, expectedVersion) => inner.save(next, expectedVersion),
     };
     const [first, second] = await Promise.allSettled([
       purchase(input(), flaky),
@@ -163,7 +163,7 @@ describe("purchase", () => {
   it("gives up after repeated conflicts", async () => {
     const inner = createInMemoryStore();
     const alwaysStale: MachineStore = {
-      load: () => inner.load(),
+      ...inner,
       save: async () => false,
     };
     await expect(purchase(input(), alwaysStale)).rejects.toThrow(
