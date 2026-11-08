@@ -1,9 +1,9 @@
 .cabinet {
   --depth: 1.2rem;
-  position: relative;
+  --bezel: 0.24rem;
   width: 24.5rem;
   max-width: calc(100% - var(--depth));
-  padding: var(--space) var(--space) calc(var(--depth) + 1rem);
+  padding: var(--space) var(--space) var(--depth);
   margin-right: var(--depth);
   margin-bottom: var(--depth);
   display: grid;
@@ -20,20 +20,10 @@
   border-radius: var(--radius);
   box-shadow:
     var(--depth) 0 0 -2px var(--color-cabinet-shade),
-    var(--depth) 0 0 var(--color-text);
-}
-
-.cabinet::after {
-  content: "";
-  position: absolute;
-  left: var(--depth);
-  right: var(--depth);
-  top: 100%;
-  height: var(--depth);
-  background: var(--color-cabinet-shade);
-  border: var(--line);
-  border-top: 0;
-  border-radius: 0 0 calc(var(--radius) / 2) calc(var(--radius) / 2);
+    var(--depth) 0 0 var(--color-text),
+    0 calc(var(--depth) * 2) 0 calc(-1 * var(--depth))
+      var(--color-cabinet-shade),
+    0 calc(var(--depth) * 2 + 2px) 0 calc(2px - var(--depth)) var(--color-text);
 }
 
 .header {
@@ -64,7 +54,7 @@
 .tray {
   grid-area: tray;
   align-self: end;
-  margin-bottom: 0.4rem;
+  margin-top: var(--space);
 }
 
 .coinReturn {
@@ -72,6 +62,6 @@
   position: relative;
   align-self: end;
   height: 3.2rem;
-  margin-bottom: 0.4rem;
   min-width: 0;
+  margin-top: var(--space);
 }

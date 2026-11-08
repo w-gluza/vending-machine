@@ -1,7 +1,12 @@
 .tray {
   height: 3.2rem;
   background: var(--color-surface);
-  border: 0.48rem solid var(--color-cabinet-shade);
+  border: var(--line);
   border-radius: var(--radius);
-  box-shadow: 0 0 0 2px var(--color-text);
+  box-shadow:
+    inset 0 0 0 var(--bezel) var(--color-cabinet-shade),
+    inset 0 0 0 calc(var(--bezel) + 1px)
+      color-mix(in srgb, var(--color-text) 60%, var(--color-cabinet-shade)),
+    inset 0 0 0 calc(var(--bezel) + 2px)
+      color-mix(in srgb, var(--color-text) 15%, transparent);
 }
