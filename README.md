@@ -95,7 +95,3 @@ I wanted the vending machine itself to be the interface, rather than just a deco
 - Cash payments are simulated. Accepted payments go into the cash box; only the initial coin supply is used for change.
 - PostgreSQL shares machine state and rate limits across server instances. Without `DATABASE_URL`, the app uses memory.
 - The reset button starts a fresh demo run. It is enabled in development or with `VENDING_RESET_ENABLED=true`.
-
-## Known limitation
-
-Purchases are not idempotent. Retrying after a lost response may create a second purchase; a production implementation would store an idempotency key with each transaction.
