@@ -1,7 +1,12 @@
 "use client";
 
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { requestPurchase } from "../api/requestPurchase";
+import { PurchaseError, requestPurchase } from "../api/requestPurchase";
+import type { PurchaseResult } from "../domain/types";
+
+export type PurchaseOutcome =
+  | { kind: "result"; result: PurchaseResult }
+  | { kind: "error"; paymentTaken: boolean };
 import { machineQueryKey, replaceMachineSnapshot } from "./useMachineSnapshot";
 
 export const usePurchase = () => {
@@ -16,10 +21,18 @@ export const usePurchase = () => {
     },
   });
 
-  const submit = (customerId: string, productId: string, paidInPence: number) =>
+  const submit = (
+    customerId: string,
+    productId: string,
+    paidInPence: number,
+  ): Promise<PurchaseOutcome> =>
     mutation
       .mutateAsync({ customerId, productId, paidInPence })
-      .catch(() => null);
+      .then((result) => ({ kind: "result" as const, result }))
+      .catch((error: unknown) => ({
+        kind: "error" as const,
+        paymentTaken: error instanceof PurchaseError && error.paymentTaken,
+      }));
 
   return {
     result: mutation.data ?? null,

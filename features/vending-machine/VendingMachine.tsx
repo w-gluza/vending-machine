@@ -123,7 +123,9 @@ export const VendingMachine = ({
       selectedProduct.id,
       insertedInPence,
     );
-    if (!outcome?.ok) return;
+    const paymentTaken =
+      outcome.kind === "result" ? outcome.result.ok : outcome.paymentTaken;
+    if (!paymentTaken) return;
     setInsertedCoins([]);
     setSelectedProductId(null);
   };

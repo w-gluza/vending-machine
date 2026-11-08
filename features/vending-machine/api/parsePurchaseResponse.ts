@@ -4,7 +4,12 @@ import type { PurchaseResult } from "../domain/types";
 
 export type ParsedPurchaseResponse =
   | { kind: "result"; result: PurchaseResult }
-  | { kind: "failure"; message: string };
+  | { kind: "failure"; message: string; paymentTaken: boolean };
+
+const failure = (
+  message: string,
+  paymentTaken = false,
+): ParsedPurchaseResponse => ({ kind: "failure", message, paymentTaken });
 
 const RESULT_STATUSES = new Set([200, 409, 422, 429]);
 const REFUSAL_STATUSES = new Set([400, 409, 422, 429]);
@@ -32,21 +37,14 @@ export const parsePurchaseResponse = (
   body: unknown,
 ): ParsedPurchaseResponse => {
   if (status === 400) {
-    return {
-      kind: "failure",
-      message: validationMessage(body) ?? UNEXPECTED_RESPONSE_MESSAGE,
-    };
+    return failure(validationMessage(body) ?? UNEXPECTED_RESPONSE_MESSAGE);
   }
-  if (status === 503) return { kind: "failure", message: BUSY_MESSAGE };
+  if (status === 503) return failure(BUSY_MESSAGE);
   if (RESULT_STATUSES.has(status)) {
     const parsed = purchaseResultSchema.safeParse(body);
     if (parsed.success) return { kind: "result", result: parsed.data };
   }
-  if (REFUSAL_STATUSES.has(status)) {
-    return { kind: "failure", message: UNEXPECTED_RESPONSE_MESSAGE };
-  }
-  if (status === 200) {
-    return { kind: "failure", message: UNREADABLE_SUCCESS_MESSAGE };
-  }
-  return { kind: "failure", message: UNCONFIRMED_MESSAGE };
+  if (REFUSAL_STATUSES.has(status)) return failure(UNEXPECTED_RESPONSE_MESSAGE);
+  if (status === 200) return failure(UNREADABLE_SUCCESS_MESSAGE, true);
+  return failure(UNCONFIRMED_MESSAGE);
 };

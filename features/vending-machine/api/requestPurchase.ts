@@ -15,6 +15,16 @@ export type PurchaseRequestInput = {
 
 export const REQUEST_TIMEOUT_MS = 10_000;
 
+export class PurchaseError extends Error {
+  readonly paymentTaken: boolean;
+
+  constructor(message: string, paymentTaken = false) {
+    super(message);
+    this.name = "PurchaseError";
+    this.paymentTaken = paymentTaken;
+  }
+}
+
 const readJson = async (response: Response): Promise<unknown> => {
   try {
     return await response.json();
@@ -35,14 +45,16 @@ export const requestPurchase = async (
       signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS),
     });
   } catch {
-    throw new Error(UNCONFIRMED_MESSAGE);
+    throw new PurchaseError(UNCONFIRMED_MESSAGE);
   }
 
   const parsed = parsePurchaseResponse(
     response.status,
     await readJson(response),
   );
-  if (parsed.kind === "failure") throw new Error(parsed.message);
+  if (parsed.kind === "failure") {
+    throw new PurchaseError(parsed.message, parsed.paymentTaken);
+  }
   return parsed.result;
 };
 

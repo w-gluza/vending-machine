@@ -171,3 +171,27 @@ test("a stalled machine refresh does not hide a failed purchase", async ({
   await expect(page.getByRole("button", { name: "Buy" })).toBeEnabled();
   await expect(page.getByText("Inserted £1.00")).toBeVisible();
 });
+
+test("an unreadable success takes the payment instead of offering it again", async ({
+  page,
+}) => {
+  await page.goto("/");
+  await page.getByRole("button", { name: /Ramune/ }).click();
+  await page.getByRole("button", { name: "Insert £1" }).click();
+  await page.route("**/api/purchase", (route) =>
+    route.fulfill({ status: 200, body: "<html>" }),
+  );
+
+  await page.getByRole("button", { name: "Buy" }).click();
+
+  await expect(
+    page.getByText(
+      "Purchase went through, but the machine's reply could not be read.",
+    ),
+  ).toBeVisible();
+  await expect(page.getByText("Inserted £0.00")).toBeVisible();
+  await expect(page.getByRole("button", { name: /Ramune/ })).toHaveAttribute(
+    "aria-pressed",
+    "false",
+  );
+});

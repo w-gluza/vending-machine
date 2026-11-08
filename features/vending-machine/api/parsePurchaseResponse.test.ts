@@ -87,6 +87,7 @@ describe("parsePurchaseResponse", () => {
     };
     expect(parsePurchaseResponse(400, body)).toEqual({
       kind: "failure",
+      paymentTaken: false,
       message: "unknown product, must be a whole number of pence",
     });
   });
@@ -94,6 +95,7 @@ describe("parsePurchaseResponse", () => {
   it("reports a busy machine on 503", () => {
     expect(parsePurchaseResponse(503, { error: "conflict" })).toEqual({
       kind: "failure",
+      paymentTaken: false,
       message: BUSY_MESSAGE,
     });
   });
@@ -128,6 +130,7 @@ describe("parsePurchaseResponse", () => {
     (_, body) => {
       expect(parsePurchaseResponse(200, body)).toEqual({
         kind: "failure",
+        paymentTaken: true,
         message: UNREADABLE_SUCCESS_MESSAGE,
       });
     },
@@ -151,6 +154,7 @@ describe("parsePurchaseResponse", () => {
   ])("keeps the coins inserted on %s", (_, status, body) => {
     expect(parsePurchaseResponse(status, body)).toEqual({
       kind: "failure",
+      paymentTaken: false,
       message: UNEXPECTED_RESPONSE_MESSAGE,
     });
   });
@@ -162,6 +166,7 @@ describe("parsePurchaseResponse", () => {
   ])("leaves the outcome unconfirmed on %s", (_, status, body) => {
     expect(parsePurchaseResponse(status, body)).toEqual({
       kind: "failure",
+      paymentTaken: false,
       message: UNCONFIRMED_MESSAGE,
     });
   });

@@ -1,6 +1,7 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 import {
   fetchMachine,
+  PurchaseError,
   requestPurchase,
   resetMachine,
   UNCONFIRMED_MESSAGE,
@@ -35,6 +36,29 @@ describe("requestPurchase", () => {
 
     const [, init] = fetchMock.mock.calls[0] as [string, RequestInit];
     expect(init.signal).toBeInstanceOf(AbortSignal);
+  });
+
+  it("flags the payment as taken when a 200 cannot be read", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockResolvedValue(new Response("<html>", { status: 200 })),
+    );
+
+    const error = await requestPurchase(input).catch((e: unknown) => e);
+
+    expect(error).toBeInstanceOf(PurchaseError);
+    expect((error as PurchaseError).paymentTaken).toBe(true);
+  });
+
+  it("keeps the payment when the machine refuses unreadably", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockResolvedValue(new Response("{}", { status: 422 })),
+    );
+
+    const error = await requestPurchase(input).catch((e: unknown) => e);
+
+    expect((error as PurchaseError).paymentTaken).toBe(false);
   });
 
   it.each([
