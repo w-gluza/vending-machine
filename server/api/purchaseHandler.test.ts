@@ -189,7 +189,7 @@ describe("POST /api/purchase", () => {
         {
           field: "paidInPence",
           message:
-            "That is a lot of coins. This machine does not take that many.",
+            "This machine does not accept that much money.",
         },
       ],
     });

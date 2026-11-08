@@ -47,7 +47,7 @@ const orderSchema = z
       .nonnegative("must be a non-negative integer number of pence")
       .max(
         MAX_CREDIT_IN_PENCE,
-        "That is a lot of coins. This machine does not take that many.",
+        "This machine does not accept that much money.",
       ),
   })
   .transform(({ productId, paidInPence }) => ({
