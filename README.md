@@ -4,6 +4,13 @@ A vending machine built with Next.js 16. Pick a drink, insert coins, and receive
 
 🔗 Live: https://vending-machine-six-mu.vercel.app
 
+<table>
+  <tr>
+    <td><img src="docs/screenshots/desktop.png" alt="The vending machine on desktop in front of Mount Fuji, with the coin column on the right" width="760"></td>
+    <td><img src="docs/screenshots/mobile.png" alt="The vending machine on a phone, with the coins in a row under the machine" width="260"></td>
+  </tr>
+</table>
+
 It is one shared machine, so you may see purchases made by other people. The ↺ button in the top right resets it.
 
 <details>
