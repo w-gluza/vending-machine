@@ -9,6 +9,8 @@
 @media (max-width: 40rem) {
   .coins {
     padding-bottom: calc(var(--space) + 0.75rem);
+    background: color-mix(in srgb, var(--color-surface) 90%, transparent);
+    border-top: var(--line);
   }
 }
 
