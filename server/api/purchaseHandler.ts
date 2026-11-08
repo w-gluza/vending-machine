@@ -25,7 +25,10 @@ const validationResponse = (issues: ValidationIssue[]): Response =>
   Response.json({ error: "validation", issues }, { status: 400 });
 
 export const createPurchaseHandler =
-  ({ store, limiter }: Instances, now: () => number = Date.now) =>
+  (
+    { store, limiter }: Pick<Instances, "store" | "limiter">,
+    now: () => number = Date.now,
+  ) =>
   async (request: Request): Promise<Response> => {
     let body: unknown;
     try {

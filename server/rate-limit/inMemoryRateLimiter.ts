@@ -1,4 +1,5 @@
 import {
+  assertRateLimitConfig,
   RATE_LIMIT_ATTEMPTS,
   RATE_LIMIT_WINDOW_MS,
   type RateLimiter,
@@ -15,12 +16,7 @@ export const createInMemoryRateLimiter = (
   windowMs = RATE_LIMIT_WINDOW_MS,
   pruneAbove = DEFAULT_PRUNE_ABOVE,
 ): InMemoryRateLimiter => {
-  if (!Number.isSafeInteger(limit) || limit < 1) {
-    throw new RangeError(`Rate limit must be a positive integer, got ${limit}`);
-  }
-  if (!Number.isFinite(windowMs) || windowMs <= 0) {
-    throw new RangeError(`Rate limit window must be positive, got ${windowMs}`);
-  }
+  assertRateLimitConfig(limit, windowMs);
   if (!Number.isSafeInteger(pruneAbove) || pruneAbove < 1) {
     throw new RangeError(
       `Prune threshold must be a positive integer, got ${pruneAbove}`,

@@ -34,6 +34,12 @@ const stateParams = (state: MachineState) => [
   state.cashBoxInPence,
 ];
 
+export const RESET_MACHINE = `UPDATE machine
+  SET coins = $1::jsonb, cash_box_in_pence = $2, version = version + 1
+  WHERE id = 1`;
+
+export const resetMachineParams = () => stateParams(createInitialState());
+
 export const createPostgresStore = (db: Db): MachineStore => ({
   async load() {
     const { rows } = await db.query<MachineRow>(
@@ -61,11 +67,6 @@ export const createPostgresStore = (db: Db): MachineStore => ({
     return rowCount === 1;
   },
   async reset() {
-    await db.query(
-      `UPDATE machine
-       SET coins = $1::jsonb, cash_box_in_pence = $2, version = version + 1
-       WHERE id = 1`,
-      stateParams(createInitialState()),
-    );
+    await db.query(RESET_MACHINE, resetMachineParams());
   },
 });

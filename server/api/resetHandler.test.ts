@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { createInitialInventory } from "@/features/vending-machine/domain/coinInventory";
+import { createInMemoryInstances } from "@/server/instance";
 import { createInMemoryStore } from "@/server/machine/inMemoryStore";
-import { createInMemoryRateLimiter } from "@/server/rate-limit/inMemoryRateLimiter";
 import { createPurchaseHandler } from "./purchaseHandler";
 import { createResetHandler } from "./resetHandler";
 
@@ -17,13 +17,12 @@ const enabled = () => true;
 
 describe("POST /api/machine/reset", () => {
   it("returns the machine to its seed state after purchases", async () => {
-    const instances = {
-      store: createInMemoryStore({
+    const instances = createInMemoryInstances(
+      createInMemoryStore({
         coins: { ...createInitialInventory(0), 5: 3 },
         cashBoxInPence: 1234,
       }),
-      limiter: createInMemoryRateLimiter(),
-    };
+    );
 
     const response = await createResetHandler(instances, enabled)();
 
@@ -36,10 +35,7 @@ describe("POST /api/machine/reset", () => {
   });
 
   it("clears the rate limit so a blocked customer can buy again", async () => {
-    const instances = {
-      store: createInMemoryStore(),
-      limiter: createInMemoryRateLimiter(),
-    };
+    const instances = createInMemoryInstances();
     const purchase = createPurchaseHandler(instances, () => 1_000);
     for (let i = 0; i < 3; i += 1) await purchase(post(order));
     expect((await purchase(post(order))).status).toBe(429);
@@ -53,10 +49,7 @@ describe("POST /api/machine/reset", () => {
     const store = createInMemoryStore();
     const { state, version } = await store.load();
 
-    await createResetHandler(
-      { store, limiter: createInMemoryRateLimiter() },
-      enabled,
-    )();
+    await createResetHandler(createInMemoryInstances(store), enabled)();
 
     expect(await store.save(state, version)).toBe(false);
   });
@@ -68,7 +61,7 @@ describe("POST /api/machine/reset", () => {
     });
 
     const response = await createResetHandler(
-      { store, limiter: createInMemoryRateLimiter() },
+      createInMemoryInstances(store),
       () => false,
     )();
 
