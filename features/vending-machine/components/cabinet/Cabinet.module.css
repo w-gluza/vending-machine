@@ -1,7 +1,8 @@
 .cabinet {
   --depth: 1.2rem;
   position: relative;
-  width: min(24.5rem, 92vw);
+  width: 24.5rem;
+  max-width: calc(100% - var(--depth));
   padding: var(--space) var(--space) calc(var(--depth) + 1rem);
   margin-right: var(--depth);
   margin-bottom: var(--depth);

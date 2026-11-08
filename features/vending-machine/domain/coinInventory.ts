@@ -54,12 +54,6 @@ export const createInitialInventory = (
 export const inventoryTotal = (coins: CoinInventory): number =>
   DENOMINATIONS.reduce((sum, d) => sum + d * coins[d], 0);
 
-export const inventoryToStacks = (coins: CoinInventory): CoinStack[] =>
-  DENOMINATIONS.map((denomination) => ({
-    denomination,
-    count: coins[denomination],
-  }));
-
 export const coinsToStacks = (coins: readonly Denomination[]): CoinStack[] =>
   DENOMINATIONS.filter((d) => coins.includes(d)).map((denomination) => ({
     denomination,

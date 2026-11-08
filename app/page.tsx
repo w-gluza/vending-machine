@@ -8,7 +8,7 @@ export const dynamic = "force-dynamic";
 export default async function Home() {
   const snapshot = await getSnapshot(getInstances().store);
   return (
-    <main className={styles.scene}>
+    <main className={styles.page}>
       <VendingMachine initialSnapshot={snapshot} />
     </main>
   );

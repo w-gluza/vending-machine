@@ -95,37 +95,43 @@ export const VendingMachine = ({ initialSnapshot }: VendingMachineProps) => {
   };
 
   return (
-    <div className={styles.stage}>
-      <Cabinet
-        brand={catalogue.brand}
-        products={products}
-        selectedProduct={selectedProduct}
-        onSelectProduct={selectProduct}
-        insertedInPence={insertedInPence}
-        insertCount={insertedCoins.length}
-        message={
-          returnedCoins.length > 0 && !result && !error ? (
-            <p>Returned {formatMoney(stacksTotal(returnedCoins))}.</p>
-          ) : (
-            <Outcome result={result} error={error} />
-          )
-        }
-        tone={toneFor(result, error)}
-        change={result?.ok ? result.change : returnedCoins}
-        onPurchase={handlePurchase}
-        onReturn={returnCoins}
-        isPurchasing={isPurchasing}
-      />
-      <aside className={styles.side}>
+    <div className={styles.layout}>
+      <header className={styles.header}>
         <UserControls
           customers={customers}
           customerId={customerId}
           onSelect={selectCustomer}
           disabled={isPurchasing}
         />
-        <Wallet onInsert={insert} disabled={isPurchasing} />
         <MachineStatus snapshot={snapshot} />
-      </aside>
+      </header>
+      <div className={styles.scene}>
+        <Cabinet
+          brand={catalogue.brand}
+          products={products}
+          selectedProduct={selectedProduct}
+          onSelectProduct={selectProduct}
+          insertedInPence={insertedInPence}
+          insertCount={insertedCoins.length}
+          message={
+            returnedCoins.length > 0 && !result && !error ? (
+              <p>Returned {formatMoney(stacksTotal(returnedCoins))}.</p>
+            ) : (
+              <Outcome result={result} error={error} />
+            )
+          }
+          tone={toneFor(result, error)}
+          change={result?.ok ? result.change : returnedCoins}
+          onPurchase={handlePurchase}
+          onReturn={returnCoins}
+          isPurchasing={isPurchasing}
+        />
+      </div>
+      <Wallet
+        className={styles.wallet}
+        onInsert={insert}
+        disabled={isPurchasing}
+      />
     </div>
   );
 };

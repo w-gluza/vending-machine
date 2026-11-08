@@ -4,7 +4,6 @@ import {
   coinsToStacks,
   countCoins,
   createInitialInventory,
-  inventoryToStacks,
   inventoryTotal,
   removeFromInventory,
   stacksTotal,
@@ -32,15 +31,6 @@ describe("coinLabel", () => {
     [200, "£2"],
   ] as const)("labels %i as %s", (denomination, expected) => {
     expect(coinLabel(denomination)).toBe(expected);
-  });
-});
-
-describe("inventoryToStacks", () => {
-  it("lists every denomination, including empty ones, largest first", () => {
-    const stacks = inventoryToStacks({ ...createInitialInventory(0), 50: 2 });
-    expect(stacks.map((s) => s.denomination)).toEqual([...DENOMINATIONS]);
-    expect(stacks.find((s) => s.denomination === 50)?.count).toBe(2);
-    expect(stacks.find((s) => s.denomination === 1)?.count).toBe(0);
   });
 });
 

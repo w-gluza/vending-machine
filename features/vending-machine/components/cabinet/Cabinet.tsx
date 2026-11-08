@@ -24,6 +24,7 @@ type CabinetProps = {
   onPurchase: () => void;
   onReturn: () => void;
   isPurchasing: boolean;
+  className?: string;
 };
 
 export const Cabinet = ({
@@ -39,8 +40,9 @@ export const Cabinet = ({
   onPurchase,
   onReturn,
   isPurchasing,
+  className,
 }: CabinetProps) => (
-  <div className={styles.cabinet}>
+  <div className={[styles.cabinet, className].filter(Boolean).join(" ")}>
     <div className={styles.header}>
       <Marquee brand={brand} />
     </div>

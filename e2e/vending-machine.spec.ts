@@ -22,19 +22,22 @@ test("a customer buys ramune with a pound and gets 15p back", async ({
     "aria-pressed",
     "false",
   );
-  await expect(page.getByText(/Cash box: £1\.00\./)).toBeVisible();
+  await expect(cashBoxValue(page)).toHaveText("£1.00");
 
   await page.reload();
-  await expect(page.getByText(/Cash box: £1\.00\./)).toBeVisible();
+  await expect(cashBoxValue(page)).toHaveText("£1.00");
   await expect(page.getByText("Inserted £0.00")).toBeVisible();
   await expect(
     page.getByText("Choose a drink, insert your coins, and press Buy."),
   ).toBeVisible();
 });
 
+const cashBoxValue = (page: import("@playwright/test").Page) =>
+  page.locator('dt:has-text("Cash box") + dd');
+
 const cashBox = async (page: import("@playwright/test").Page) => {
-  const text = await page.getByText(/Cash box: £/).textContent();
-  return Number(/Cash box: £(\d+\.\d\d)/.exec(text ?? "")?.[1]);
+  const text = await cashBoxValue(page).textContent();
+  return Number(/£(\d+\.\d\d)/.exec(text ?? "")?.[1]);
 };
 
 test("an offline purchase fails at once and keeps the coins in", async ({

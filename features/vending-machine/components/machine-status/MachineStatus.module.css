@@ -1,10 +1,24 @@
-.coins {
-  display: grid;
-  grid-template-columns: repeat(4, auto);
-  gap: var(--space-s);
-  justify-content: start;
+.totals {
+  display: flex;
+  gap: var(--space-l);
+  padding: var(--space) var(--space-l);
+  font-variant-numeric: tabular-nums;
 }
 
-.totals {
+.totals dt {
   font-size: var(--font-s);
+  opacity: 0.7;
+}
+
+.totals dd {
+  margin: 0;
+  font-size: var(--font-l);
+  font-weight: 600;
+  line-height: 1.1;
+}
+
+@media (max-width: 40rem) {
+  .totals {
+    padding: var(--space-s) var(--space-l);
+  }
 }

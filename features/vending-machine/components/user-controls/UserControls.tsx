@@ -1,5 +1,4 @@
 import { Button } from "@/components/button/Button";
-import { Card } from "@/components/card/Card";
 import styles from "./UserControls.module.css";
 
 type UserControlsProps = {
@@ -7,6 +6,7 @@ type UserControlsProps = {
   customerId: string;
   onSelect: (id: string) => void;
   disabled?: boolean;
+  className?: string;
 };
 
 export const UserControls = ({
@@ -14,21 +14,23 @@ export const UserControls = ({
   customerId,
   onSelect,
   disabled = false,
+  className,
 }: UserControlsProps) => (
-  <Card title="Who is buying">
-    <ul className={styles.row}>
-      {customers.map((customer) => (
-        <li key={customer}>
-          <Button
-            size="s"
-            selected={customer === customerId}
-            onClick={() => onSelect(customer)}
-            disabled={disabled}
-          >
-            {customer}
-          </Button>
-        </li>
-      ))}
-    </ul>
-  </Card>
+  <ul
+    className={[styles.customers, className].filter(Boolean).join(" ")}
+    aria-label="Who is buying"
+  >
+    {customers.map((customer) => (
+      <li key={customer}>
+        <Button
+          size="s"
+          selected={customer === customerId}
+          onClick={() => onSelect(customer)}
+          disabled={disabled}
+        >
+          {customer}
+        </Button>
+      </li>
+    ))}
+  </ul>
 );
