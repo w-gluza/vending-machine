@@ -188,8 +188,7 @@ describe("POST /api/purchase", () => {
       issues: [
         {
           field: "paidInPence",
-          message:
-            "This machine does not accept that much money.",
+          message: "This machine does not accept that much money.",
         },
       ],
     });

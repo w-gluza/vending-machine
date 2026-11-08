@@ -34,7 +34,7 @@ It is one shared machine, so you may see purchases made by other people. The ↺
 
 ## Run it locally
 
-Node 20.9 or newer.
+Node 22.12 or newer. Node 24 LTS is recommended.
 
 ```sh
 npm install
