@@ -62,10 +62,11 @@
 }
 
 .button:disabled:not([aria-pressed="true"]) {
-  color: color-mix(in srgb, var(--color-text) 45%, var(--color-surface));
-  border-color: color-mix(in srgb, var(--color-text) 45%, var(--color-surface));
+  --ink: color-mix(in srgb, var(--color-text) 60%, var(--color-surface));
+  color: var(--ink);
+  border-color: var(--ink);
   background: var(--color-surface);
-  box-shadow: none;
+  box-shadow: var(--shadow) var(--shadow) 0 var(--ink);
   transform: none;
   cursor: not-allowed;
 }
