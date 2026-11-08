@@ -3,7 +3,6 @@
 import { useEffect, useState } from "react";
 import { Button } from "@/components/button/Button";
 import { ResetIcon } from "@/components/icons/ResetIcon";
-import { StatsIcon } from "@/components/icons/StatsIcon";
 import { customers } from "@/data/customers";
 import { catalogue } from "@/data/catalogues";
 import { formatMoney } from "@/lib/formatMoney";
@@ -133,7 +132,7 @@ export const VendingMachine = ({ initialSnapshot }: VendingMachineProps) => {
             aria-label="Machine stats"
             title="Machine stats"
           >
-            <StatsIcon />
+            <span aria-hidden="true">£</span>
           </Button>
           <Button
             size="s"
