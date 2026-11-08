@@ -21,11 +21,6 @@ const statusFor = (result: PurchaseResult): number => {
   }
 };
 
-const echoablePence = (value: unknown): number =>
-  typeof value === "number" && Number.isSafeInteger(value) && value >= 0
-    ? value
-    : 0;
-
 const validationResponse = (issues: ValidationIssue[]): Response =>
   Response.json({ error: "validation", issues }, { status: 400 });
 
@@ -56,8 +51,6 @@ export const createPurchaseHandler =
         reason: "rate_limited",
         message: `Too many purchases. Try again in ${(gate.retryAfterMs / 1000).toFixed(1)}s.`,
         retryAfterMs: gate.retryAfterMs,
-        priceInPence: 0,
-        paidInPence: echoablePence(body.paidInPence),
         machine: await getSnapshot(store),
       };
       return Response.json(result, {

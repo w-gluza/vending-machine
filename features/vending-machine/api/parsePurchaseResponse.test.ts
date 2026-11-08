@@ -67,8 +67,6 @@ describe("parsePurchaseResponse", () => {
       reason: "rate_limited",
       message: "Too many purchases.",
       retryAfterMs: 1500,
-      priceInPence: 0,
-      paidInPence: 100,
       machine,
     };
     expect(parsePurchaseResponse(429, body)).toEqual({

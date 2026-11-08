@@ -66,6 +66,6 @@ export const purchaseResultSchema = z.union([
   z.discriminatedUnion("reason", [
     insufficientPayment.extend(context),
     cannotMakeChange.extend(context),
-    rateLimitRefusalSchema.extend(context),
+    rateLimitRefusalSchema.extend({ machine: machineSnapshotSchema }),
   ]),
 ]);

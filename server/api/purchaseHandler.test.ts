@@ -82,11 +82,10 @@ describe("POST /api/purchase", () => {
     expect(Number(response.headers.get("Retry-After"))).toBeGreaterThanOrEqual(
       1,
     );
-    expect(await response.json()).toMatchObject({
-      ok: false,
-      reason: "rate_limited",
-      paidInPence: 100,
-    });
+    const body = await response.json();
+    expect(body).toMatchObject({ ok: false, reason: "rate_limited" });
+    expect(body).not.toHaveProperty("priceInPence");
+    expect(body).not.toHaveProperty("paidInPence");
   });
 
   it("rate limits before checking the product, so an unknown product still spends an attempt", async () => {
@@ -103,13 +102,12 @@ describe("POST /api/purchase", () => {
     ["an object", { toString: null, valueOf: null }],
     ["a negative number", -1],
   ])(
-    "still answers 429 with a zero echo when a throttled payment is %s",
+    "still answers 429 before validating when a throttled payment is %s",
     async (_, paidInPence) => {
       const handler = createPurchaseHandler(instances());
       for (let i = 0; i < 3; i++) await handler(post(valid));
       const response = await handler(post({ ...valid, paidInPence }));
       expect(response.status).toBe(429);
-      expect(await response.json()).toMatchObject({ paidInPence: 0 });
     },
   );
 
