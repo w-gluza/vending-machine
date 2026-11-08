@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import "@/styles/reset.css";
 import "@/styles/themes/jp.css";
 import "@/styles/tokens.css";
@@ -20,6 +20,10 @@ export const metadata: Metadata = {
     type: "website",
     locale: "en_GB",
   },
+};
+
+export const viewport: Viewport = {
+  viewportFit: "cover",
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
