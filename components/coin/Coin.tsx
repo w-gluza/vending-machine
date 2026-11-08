@@ -31,7 +31,11 @@ export const Coin = ({
     return (
       <span
         role="img"
-        aria-label={count === undefined ? label : `${label}, ${count} coins`}
+        aria-label={
+          count === undefined
+            ? label
+            : `${label}, ${count} ${count === 1 ? "coin" : "coins"}`
+        }
         className={className}
       >
         {content}

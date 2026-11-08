@@ -1,6 +1,14 @@
 import { formatMoney } from "@/lib/formatMoney";
-import type { PurchaseResult } from "../../../domain/types";
+import { coinLabel } from "../../../domain/coinInventory";
+import type { CoinStack, PurchaseResult } from "../../../domain/types";
 import styles from "./Outcome.module.css";
+
+const listCoins = (change: readonly CoinStack[]): string =>
+  change
+    .flatMap((stack) =>
+      Array.from({ length: stack.count }, () => coinLabel(stack.denomination)),
+    )
+    .join(", ");
 
 type OutcomeProps = {
   result: PurchaseResult | null;
@@ -23,6 +31,11 @@ export const Outcome = ({ result, error }: OutcomeProps) => {
             ? "Exact payment, no change."
             : `Change ${formatMoney(result.changeDueInPence)}.`}
         </p>
+        {result.change.length > 0 && (
+          <p className={styles.coins}>
+            {`Coins returned: ${listCoins(result.change)}.`}
+          </p>
+        )}
       </div>
     );
   }
