@@ -1,1 +1,1 @@
-export const customers: readonly string[] = ["Alice", "Bob", "Chen"];
+export const customers: readonly string[] = ["Sui", "Ren", "Mio"];

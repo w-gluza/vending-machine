@@ -9,7 +9,7 @@ test("a customer buys ramune with a pound and gets 15p back", async ({
 }) => {
   await page.goto("/");
 
-  await page.getByRole("button", { name: "Bob" }).click();
+  await page.getByRole("button", { name: "Ren" }).click();
   await page.getByRole("button", { name: /Ramune/ }).click();
   await page.getByRole("button", { name: "Insert £1" }).click();
   await expect(page.getByText("Inserted £1.00")).toBeVisible();
@@ -60,7 +60,7 @@ test("an offline purchase fails at once and keeps the coins in", async ({
     if (request.url().endsWith("/api/purchase")) purchaseRequests += 1;
   });
 
-  await page.getByRole("button", { name: "Chen" }).click();
+  await page.getByRole("button", { name: "Mio" }).click();
   await page.getByRole("button", { name: /Ramune/ }).click();
   await page.getByRole("button", { name: "Insert £1" }).click();
 
@@ -114,7 +114,7 @@ test("a slow machine read cannot overwrite a newer purchase", async ({
   );
   await captured;
 
-  await page.getByRole("button", { name: "Alice" }).click();
+  await page.getByRole("button", { name: "Sui" }).click();
   await page.getByRole("button", { name: /Ramune/ }).click();
   await page.getByRole("button", { name: "Insert £1" }).click();
   await page.getByRole("button", { name: "Buy" }).click();
