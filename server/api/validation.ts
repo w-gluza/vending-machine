@@ -1,7 +1,6 @@
 import { z } from "zod";
 import { products, type Product } from "@/data/products";
 import { MAX_CREDIT_IN_PENCE } from "@/features/vending-machine/domain/types";
-import { formatMoney } from "@/lib/formatMoney";
 
 export const MAX_CUSTOMER_ID_LENGTH = 64;
 
@@ -29,11 +28,14 @@ const customerIdSchema = z
   );
 
 const productSchema = z
-  .string("must be a known product id")
+  .string("This machine does not stock that.")
   .transform((id, ctx): Product => {
     const product = products.find((p) => p.id === id);
     if (product) return product;
-    ctx.addIssue({ code: "custom", message: "must be a known product id" });
+    ctx.addIssue({
+      code: "custom",
+      message: "This machine does not stock that.",
+    });
     return z.NEVER;
   });
 
@@ -45,7 +47,7 @@ const orderSchema = z
       .nonnegative("must be a non-negative integer number of pence")
       .max(
         MAX_CREDIT_IN_PENCE,
-        `Steady on, big spender. This machine takes ${formatMoney(MAX_CREDIT_IN_PENCE)} at most.`,
+        "That is a lot of coins. This machine does not take that many.",
       ),
   })
   .transform(({ productId, paidInPence }) => ({

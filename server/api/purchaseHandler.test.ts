@@ -179,7 +179,7 @@ describe("POST /api/purchase", () => {
     ]);
   });
 
-  it("tells a big spender where the credit limit is", async () => {
+  it("tells a customer over the credit limit how much the machine takes", async () => {
     const response = await createPurchaseHandler(instances())(
       post({ ...valid, paidInPence: MAX_CREDIT_IN_PENCE + 1 }),
     );
@@ -188,7 +188,8 @@ describe("POST /api/purchase", () => {
       issues: [
         {
           field: "paidInPence",
-          message: "Steady on, big spender. This machine takes £10.00 at most.",
+          message:
+            "That is a lot of coins. This machine does not take that many.",
         },
       ],
     });
