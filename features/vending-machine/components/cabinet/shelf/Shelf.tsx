@@ -1,3 +1,4 @@
+import Image from "next/image";
 import type { Product } from "@/data/products";
 import { formatMoney } from "@/lib/formatMoney";
 import styles from "./Shelf.module.css";
@@ -25,7 +26,13 @@ export const Shelf = ({
           onClick={() => onSelect(product.id)}
           disabled={disabled}
         >
-          <img src={product.image} alt="" />
+          <Image
+            src={product.image}
+            alt=""
+            width={200}
+            height={400}
+            unoptimized
+          />
           <span>{product.name}</span>
           <strong>{formatMoney(product.priceInPence)}</strong>
         </button>
