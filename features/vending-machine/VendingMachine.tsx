@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { Button } from "@/components/button/Button";
 import { ResetIcon } from "@/components/icons/ResetIcon";
 import { customers } from "@/data/customers";
@@ -13,6 +13,7 @@ import type {
   MachineSnapshot,
   PurchaseResult,
 } from "./domain/types";
+import { useAutoClear } from "./hooks/useAutoClear";
 import { usePurchase } from "./hooks/usePurchase";
 import { MachineStatus } from "./components/machine-status/MachineStatus";
 import { UserControls } from "./components/user-controls/UserControls";
@@ -61,11 +62,12 @@ export const VendingMachine = ({ initialSnapshot }: VendingMachineProps) => {
     products.find((p) => p.id === selectedProductId) ?? null;
   const insertedInPence = insertedCoins.reduce((sum, coin) => sum + coin, 0);
 
-  useEffect(() => {
-    if (!result?.ok) return;
-    const timer = setTimeout(clearOutcome, SUCCESS_DISPLAY_MS);
-    return () => clearTimeout(timer);
-  }, [result, clearOutcome]);
+  useAutoClear(result?.ok ? result : null, clearOutcome, SUCCESS_DISPLAY_MS);
+  useAutoClear(
+    returnedCoins.length > 0 ? returnedCoins : null,
+    () => setReturnedCoins([]),
+    SUCCESS_DISPLAY_MS,
+  );
 
   const startInteraction = () => {
     clearOutcome();
