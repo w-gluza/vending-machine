@@ -1,5 +1,5 @@
 .page {
-  min-height: 100svh;
+  min-height: 100lvh;
   padding-bottom: env(safe-area-inset-bottom);
   padding-inline: env(safe-area-inset-left) env(safe-area-inset-right);
   display: grid;
